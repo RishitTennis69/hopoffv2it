@@ -1,20 +1,23 @@
 {
   "expo": {
-    "name": "hopoffv2it",
+    "name": "HopOff",
     "slug": "hopoffv2it",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "hopoffv2it",
-    "userInterfaceStyle": "automatic",
+    "scheme": "hopoff",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#000000",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "supportsTablet": true,
+      "userInterfaceStyle": "dark"
     },
     "android": {
+      "package": "com.hopoff.app",
+      "userInterfaceStyle": "dark",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#000000",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
@@ -25,20 +28,35 @@
     },
     "plugins": [
       "expo-router",
+      "expo-video",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
+          "backgroundColor": "#000000",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120
+        }
+      ],
+      "./plugins/withHopOffAndroid",
+      [
+        "expo-share-intent",
+        {
+          "androidIntentFilters": [
+            "text/*"
+          ],
+          "disableIOS": true
         }
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    }
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "393531fb-96ee-4fcc-b959-be08f7d1bd68"
+      }
+    },
+    "owner": "kgrogerrr"
   }
 }

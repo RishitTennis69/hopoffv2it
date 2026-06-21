@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hopoff_accessibility_description">HopOff uses accessibility to show your motivation screen when you exceed a daily app limit.</string>
+</resources>
