@@ -10,25 +10,32 @@ export const PERMISSION_META: Record<
   { title: string; path: string; skippable: boolean; openLabel: string; confirmLabel: string }
 > = {
   usage: {
-    title: 'Usage access',
-    path: 'Usage access → HopOff → Allow',
+    title: 'Step 1: Usage access',
+    path: 'Let HopOff detect when you hit your limit and track your usage.',
     skippable: false,
-    openLabel: 'Open Usage access',
-    confirmLabel: 'I enabled Usage Access',
+    openLabel: 'Open Usage Access',
+    confirmLabel: 'Open Usage Access',
   },
   accessibility: {
-    title: 'Accessibility',
-    path: 'Accessibility → HopOff → Allow',
-    skippable: true,
-    openLabel: 'Open Accessibility',
-    confirmLabel: 'I enabled Accessibility',
+    title: 'Step 2: Accessibility',
+    path: 'Let HopOff block distracting apps when you try to open them.',
+    skippable: false,
+    openLabel: 'Open Accessibility Settings',
+    confirmLabel: 'Open Accessibility Settings',
   },
   screenTime: {
     title: 'Screen Time',
-    path: 'Screen Time → HopOff → Allow',
+    path: 'Screen Time -> HopOff -> Allow',
     skippable: false,
     openLabel: 'Open Screen Time',
     confirmLabel: 'I enabled Screen Time',
+  },
+  microphone: {
+    title: 'Microphone',
+    path: 'Already enabled for voice goals',
+    skippable: false,
+    openLabel: 'Open Microphone settings',
+    confirmLabel: "I've enabled Microphone",
   },
 };
 

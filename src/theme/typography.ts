@@ -1,57 +1,57 @@
-// Inter everywhere. Font family keys match @expo-google-fonts/inter exports.
+// Plus Jakarta Sans handles the full hierarchy; weight creates the contrast.
 export const fonts = {
-  regular: 'Inter_400Regular',
-  medium: 'Inter_500Medium',
-  semibold: 'Inter_600SemiBold',
-  bold: 'Inter_700Bold',
-  extrabold: 'Inter_800ExtraBold',
-  black: 'Inter_900Black',
+  regular: 'PlusJakartaSans_400Regular',
+  medium: 'PlusJakartaSans_500Medium',
+  semibold: 'PlusJakartaSans_600SemiBold',
+  bold: 'PlusJakartaSans_700Bold',
+  displayBold: 'PlusJakartaSans_700Bold',
+  displayBlack: 'PlusJakartaSans_800ExtraBold',
 } as const;
 
 export const type = {
-  // Big centered hero / screen titles
   hero: {
-    fontFamily: fonts.black,
-    fontSize: 34,
-    lineHeight: 39,
-    letterSpacing: -0.5,
+    fontFamily: fonts.displayBlack,
+    fontSize: 45,
+    lineHeight: 50,
+    letterSpacing: 0,
   },
   title: {
-    fontFamily: fonts.extrabold,
-    fontSize: 30,
-    lineHeight: 36,
-    letterSpacing: -0.4,
+    fontFamily: fonts.displayBlack,
+    fontSize: 32,
+    lineHeight: 40,
+    letterSpacing: 0,
   },
   subheading: {
-    fontFamily: fonts.semibold,
-    fontSize: 18,
-    lineHeight: 24,
+    fontFamily: fonts.bold,
+    fontSize: 20,
+    lineHeight: 27,
   },
   body: {
-    fontFamily: fonts.regular,
-    fontSize: 15,
-    lineHeight: 22,
+    fontFamily: fonts.medium,
+    fontSize: 16,
+    lineHeight: 24,
   },
   bodyStrong: {
-    fontFamily: fonts.semibold,
-    fontSize: 16,
-    lineHeight: 22,
+    fontFamily: fonts.bold,
+    fontSize: 17,
+    lineHeight: 24,
   },
   caption: {
     fontFamily: fonts.semibold,
     fontSize: 12,
     lineHeight: 16,
-    letterSpacing: 0.3,
+    letterSpacing: 0,
   },
-  // Big stat numbers
   stat: {
-    fontFamily: fonts.extrabold,
-    fontSize: 30,
-    letterSpacing: -1,
+    fontFamily: fonts.displayBlack,
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: 0,
   },
   button: {
     fontFamily: fonts.bold,
-    fontSize: 16,
-    letterSpacing: 0.1,
+    fontSize: 18,
+    lineHeight: 23,
+    letterSpacing: 0,
   },
 } as const;

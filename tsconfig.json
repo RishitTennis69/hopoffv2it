@@ -8,6 +8,9 @@
       ],
       "@/assets/*": [
         "./assets/*"
+      ],
+      "hopoff-monitor": [
+        "./modules/hopoff-monitor/src"
       ]
     }
   },

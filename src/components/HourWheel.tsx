@@ -1,6 +1,12 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated';
 import Svg, { Circle, G, Line, Path } from 'react-native-svg';
 
 import { haptics } from '@/lib/haptics';
@@ -36,8 +42,7 @@ function arcPath(cx: number, cy: number, r: number, sweepFrac: number) {
 }
 
 function spokeCountFor(max: number, step: number) {
-  if (step >= 1) return Math.max(1, Math.round(max / step));
-  return Math.max(1, Math.floor(max));
+  return Math.max(6, Math.round(max / step / 2));
 }
 
 export function HourWheel({
@@ -54,6 +59,18 @@ export function HourWheel({
   const cy = size / 2;
   const ringR = size / 2 - 22;
   const lowerBound = min ?? step;
+  const centerPulse = useSharedValue(0);
+
+  useEffect(() => {
+    centerPulse.value = withSequence(
+      withSpring(1, { damping: 14, stiffness: 260 }),
+      withSpring(0, { damping: 16, stiffness: 240 }),
+    );
+  }, [centerPulse, value]);
+
+  const centerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + centerPulse.value * 0.035 }],
+  }));
 
   const pan = useMemo(() => {
     const setFromAngle = (x: number, y: number) => {
@@ -104,15 +121,16 @@ export function HourWheel({
             x2={s.outer.x}
             y2={s.outer.y}
             stroke={colors.textGhost}
-            strokeWidth={2}
+            strokeWidth={3}
             strokeLinecap="round"
           />
         ))}
-        <Circle cx={cx} cy={cy} r={ringR} stroke={colors.glassBorder} strokeWidth={3} fill="none" />
-        <Path d={arcPath(cx, cy, ringR, sweep)} stroke={colors.white} strokeWidth={3} fill="none" strokeLinecap="round" />
+        <Circle cx={cx} cy={cy} r={ringR} stroke={colors.surfaceAlt} strokeWidth={18} fill="none" />
+        <Circle cx={cx} cy={cy} r={ringR} stroke={colors.glassBorder} strokeWidth={2} fill="none" />
+        <Path d={arcPath(cx, cy, ringR, sweep)} stroke={colors.black} strokeWidth={18} fill="none" strokeLinecap="butt" />
         <G>
-          <Circle cx={handle.x} cy={handle.y} r={11} fill={colors.white} />
-          <Circle cx={handle.x} cy={handle.y} r={4} fill={colors.black} />
+          <Circle cx={handle.x} cy={handle.y} r={17} fill={colors.black} />
+          <Circle cx={handle.x} cy={handle.y} r={5} fill={colors.white} />
         </G>
       </Svg>
 
@@ -120,14 +138,14 @@ export function HourWheel({
         <View style={[StyleSheet.absoluteFill, styles.touchLayer]} />
       </GestureDetector>
 
-      <View style={[StyleSheet.absoluteFill, styles.center]} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, styles.center, centerStyle]} pointerEvents="none">
         <Txt variant="stat" style={{ fontSize: 48, lineHeight: 52 }}>
           {centerBig}
         </Txt>
         <Txt variant="body" color={colors.textMuted}>
           {centerSmall}
         </Txt>
-      </View>
+      </Animated.View>
     </View>
   );
 }

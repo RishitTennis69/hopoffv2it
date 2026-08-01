@@ -1,7 +1,7 @@
 import { Modal, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { colors, radius, spacing } from '@/theme';
+import { colors, radius, shadow, spacing } from '@/theme';
 import { PillButton } from './PillButton';
 import { Txt } from './Txt';
 
@@ -15,7 +15,6 @@ interface Props {
   onCancel: () => void;
 }
 
-// Centered confirmation dialog (e.g. "use the default order").
 export function ConfirmModal({
   visible,
   title,
@@ -27,8 +26,8 @@ export function ConfirmModal({
 }: Props) {
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onCancel} statusBarTranslucent>
-      <Animated.View entering={FadeIn} style={styles.scrim}>
-        <Animated.View entering={ZoomIn.springify().damping(18)} style={styles.card}>
+      <Animated.View entering={FadeIn.duration(200)} style={styles.scrim}>
+        <Animated.View entering={FadeIn.duration(220)} style={styles.card}>
           <Txt variant="subheading" center>
             {title}
           </Txt>
@@ -55,12 +54,13 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    backgroundColor: colors.darkElevated,
+    backgroundColor: colors.surface,
     borderRadius: radius.card,
     borderWidth: StyleSheet.hairlineWidth * 2,
     borderColor: colors.glassBorder,
     padding: spacing.xl,
     gap: spacing.md,
+    ...shadow,
   },
   actions: {
     gap: spacing.xs,

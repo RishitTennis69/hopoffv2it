@@ -1,0 +1,14 @@
+
+> hopoffv2it@1.0.0 web
+> expo start --web --port 8087
+
+env: load .env
+env: export EXPO_PUBLIC_OPENROUTER_API_KEY EXPO_PUBLIC_YOUTUBE_API_KEY
+Starting project at C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it
+Logs: C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it\.expo\dev\logs\start.log
+[expo-share-intent] IOS module disabled
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+
+Waiting on http://localhost:8087
+Logs for your project will appear below.

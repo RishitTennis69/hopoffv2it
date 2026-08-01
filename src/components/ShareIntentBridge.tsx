@@ -1,13 +1,10 @@
-import { useShareIntent } from 'expo-share-intent';
 import { useEffect, useRef } from 'react';
 
-import { ingestSharedUrl } from '@/services/shareIntake';
-import { useVideos } from '@/store';
+import { useShareIntent } from 'expo-share-intent';
 
-/** Listens for Android/iOS share-sheet payloads and adds them to the library. */
+/** Share-sheet video importing is paused until TikTok/Instagram metadata is reliable. */
 export function ShareIntentBridge() {
   const { hasShareIntent, shareIntent, resetShareIntent, error } = useShareIntent();
-  const addVideo = useVideos((s) => s.addVideo);
   const handled = useRef<string | null>(null);
 
   useEffect(() => {
@@ -22,11 +19,8 @@ export function ShareIntentBridge() {
       (shareIntent.text?.startsWith('http') ? shareIntent.text : undefined);
     if (!url || handled.current === url) return;
     handled.current = url;
-
-    void ingestSharedUrl(url, shareIntent.meta?.title ?? null)
-      .then(addVideo)
-      .finally(() => resetShareIntent());
-  }, [hasShareIntent, shareIntent, addVideo, resetShareIntent]);
+    resetShareIntent();
+  }, [hasShareIntent, shareIntent, resetShareIntent]);
 
   return null;
 }

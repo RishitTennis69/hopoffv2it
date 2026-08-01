@@ -1,31 +1,27 @@
-// HopOff color system — pure black canvas, white type, dark glass.
+// HopOff color system: white canvas, light gray cards, black primary actions.
 export const colors = {
-  bg: '#000000',
-  // Light surfaces (stat tiles, primary CTAs, block video shell)
-  card: '#F0F0F0',
-  cardText: '#000000',
+  bg: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceAlt: '#F7F7F7',
+  card: '#FFFFFF',
+  cardText: '#0A0A0A',
 
-  // Text on black
-  text: '#FFFFFF',
-  textMuted: 'rgba(255,255,255,0.6)',
-  textFaint: 'rgba(255,255,255,0.3)',
-  textGhost: 'rgba(255,255,255,0.18)',
+  text: '#0A0A0A',
+  textMuted: '#565656',
+  textFaint: '#9A9A9A',
+  textGhost: '#D8D8D8',
 
-  // Dark glass
-  glassFill: 'rgba(255,255,255,0.04)',
-  glassFillActive: 'rgba(255,255,255,0.08)',
-  glassBorder: 'rgba(255,255,255,0.10)',
-  glassBorderActive: 'rgba(255,255,255,0.18)',
-  glassHighlight: 'rgba(255,255,255,0.22)',
+  glassFill: '#FFFFFF',
+  glassFillActive: '#FFFFFF',
+  glassBorder: 'rgba(10,10,10,0.09)',
+  glassBorderActive: 'rgba(10,10,10,0.22)',
+  glassHighlight: 'rgba(247,247,247,0)',
+  pressFill: 'rgba(10,10,10,0.055)',
 
-  // Near-black fill (dark / secondary pill, tab bar)
-  dark: '#0E0E0E',
+  dark: '#0A0A0A',
   darkElevated: '#161616',
+  accent: '#0A0A0A',
 
-  // Accent — rare emphasis
-  accent: '#3466AA',
-
-  // Status
   danger: '#E2453C',
   success: '#3FB984',
 

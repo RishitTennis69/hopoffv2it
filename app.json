@@ -7,23 +7,38 @@
     "icon": "./assets/images/icon.png",
     "scheme": "hopoff",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#000000",
+    "backgroundColor": "#FFFFFF",
     "ios": {
       "supportsTablet": true,
-      "userInterfaceStyle": "dark"
+      "userInterfaceStyle": "dark",
+      "buildNumber": "6",
+      "deploymentTarget": "16.4",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Allow HopOff to transcribe your spoken goals.",
+        "NSMicrophoneUsageDescription": "Allow HopOff to use the microphone for voice goal entry."
+      }
     },
     "android": {
-      "package": "com.hopoff.app",
+      "package": "com.gethopoff.app",
+      "versionCode": 9,
       "userInterfaceStyle": "dark",
       "adaptiveIcon": {
-        "backgroundColor": "#000000",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -32,7 +47,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#000000",
+          "backgroundColor": "#FFFFFF",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 120
         }
@@ -46,6 +61,13 @@
           ],
           "disableIOS": true
         }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow HopOff to use the microphone for voice goal entry.",
+          "speechRecognitionPermission": "Allow HopOff to transcribe your spoken goals."
+        }
       ]
     ],
     "experiments": {
@@ -54,9 +76,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "393531fb-96ee-4fcc-b959-be08f7d1bd68"
+        "projectId": "895c21d4-60d8-4812-86db-90028174a39a"
       }
     },
-    "owner": "kgrogerrr"
+    "owner": "courtmateeee"
   }
 }

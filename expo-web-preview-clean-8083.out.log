@@ -1,0 +1,19 @@
+
+> hopoffv2it@1.0.0 web
+> expo start --web --port 8083
+
+env: load .env
+env: export EXPO_PUBLIC_OPENROUTER_API_KEY EXPO_PUBLIC_YOUTUBE_API_KEY
+Starting project at C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it
+Logs: C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it\.expo\dev\logs\start.log
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+
+Waiting on http://localhost:8083
+An update for expo is available: 56.0.12 → ~56.0.14
+6 other packages may need updating. Run npx expo install --check for details.
+Logs for your project will appear below.
+λ Bundled 25653ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1625 modules)
+[HopOff] YouTube API key loaded: true (len=39)
+[HopOff] OpenRouter API key loaded: true
+[HopOff] OpenRouter model: openai/gpt-4o-mini

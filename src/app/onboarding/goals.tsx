@@ -1,46 +1,38 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+
+import { View } from 'react-native';
 
 import { GoalsEditor, OnboardingShell, PillButton, ScreenTitle } from '@/components';
-import { polishGoals } from '@/services/aiPolish';
-import { haptics } from '@/lib/haptics';
 import { useGoals } from '@/store';
 
 export default function GoalsStep() {
   const text = useGoals((s) => s.text);
-  const setText = useGoals((s) => s.setText);
-  const [polishing, setPolishing] = useState(false);
-  const [polished, setPolished] = useState(false);
-
   const hasText = text.trim().length > 0;
 
-  const onPolish = async () => {
-    setPolishing(true);
-    const cleaned = await polishGoals(text);
-    setText(cleaned);
-    setPolishing(false);
-    setPolished(true);
-    haptics.success();
-  };
-
-  const footer = polished ? (
-    <PillButton label="Continue" onPress={() => router.push('/onboarding/videos')} />
-  ) : (
-    <PillButton
-      label={polishing ? 'Polishing your list…' : 'Polish my list'}
-      loading={polishing}
-      disabled={!hasText}
-      onPress={onPolish}
-    />
-  );
-
   return (
-    <OnboardingShell stepIndex={4} onBack={() => router.back()} footer={footer}>
+    <OnboardingShell
+      stepIndex={3}
+      onBack={() => router.back()}
+      footer={
+        <View style={{ gap: 8 }}>
+          <PillButton
+            label="Continue"
+            variant="primary"
+            disabled={!hasText}
+            onPress={() => {
+              router.push('/onboarding/redirect');
+            }}
+          />
+        </View>
+      }>
       <ScreenTitle
-        title="Define your weekly goals."
-        subtitle="These become the alternatives we surface when you hit a limit."
+        title="What are you taking your time back for?"
+        subtitle="Write a few specific goals. HopOff uses these to make your reset feel personal."
       />
-      <GoalsEditor minHeight={150} placeholder="e.g. Read 10 pages&#10;Go to the gym&#10;Call my family" />
+      <GoalsEditor
+        minHeight={230}
+        placeholder={'Read before bed\nGo to the gym after school\nPractice guitar\nSpend more time with family'}
+      />
     </OnboardingShell>
   );
 }

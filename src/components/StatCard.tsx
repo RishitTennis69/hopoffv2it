@@ -1,50 +1,90 @@
 import { StyleSheet, View } from 'react-native';
 
-import { colors, radius, type } from '@/theme';
+import { colors, spacing, type } from '@/theme';
+import { GlassCard } from './GlassCard';
 import { Txt } from './Txt';
 
-interface Props {
+interface StatItemProps {
   label: string;
   value: string;
   unit?: string;
 }
 
-// Light stat tile — black text on #F0F0F0.
-export function StatCard({ label, value, unit }: Props) {
+function StatItem({ label, value, unit }: StatItemProps) {
   return (
-    <View style={styles.card}>
-      <Txt variant="caption" color="rgba(0,0,0,0.45)" numberOfLines={1}>
+    <View style={styles.item}>
+      <Txt variant="caption" color={colors.textFaint} numberOfLines={1} center>
         {label}
       </Txt>
       <View style={styles.valueRow}>
-        <Txt style={[type.stat, styles.value]}>{value}</Txt>
+        <Txt style={styles.value}>{value}</Txt>
+        {unit ? (
+          <Txt variant="caption" color={colors.textMuted} style={styles.unit}>
+            {unit}
+          </Txt>
+        ) : null}
       </View>
-      {unit ? (
-        <Txt variant="caption" color="rgba(0,0,0,0.55)" numberOfLines={1}>
-          {unit}
-        </Txt>
-      ) : null}
     </View>
   );
 }
 
+interface Props {
+  stats: StatItemProps[];
+}
+
+/** Three-up stat strip on dark glass — dividers between columns. */
+export function StatCard({ stats }: Props) {
+  return (
+    <GlassCard style={styles.strip}>
+      {stats.map((s, i) => (
+        <View key={s.label} style={styles.cell}>
+          {i > 0 ? <View style={styles.divider} /> : null}
+          <StatItem {...s} />
+        </View>
+      ))}
+    </GlassCard>
+  );
+}
+
 const styles = StyleSheet.create({
-  card: {
+  strip: {
+    flexDirection: 'row',
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.sm,
+  },
+  cell: {
     flex: 1,
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    paddingHorizontal: 14,
-    paddingVertical: 16,
-    gap: 6,
-    minHeight: 104,
-    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    minWidth: 0,
+  },
+  item: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingHorizontal: 4,
+  },
+  divider: {
+    width: StyleSheet.hairlineWidth * 2,
+    alignSelf: 'stretch',
+    backgroundColor: colors.glassBorder,
+    marginVertical: 2,
   },
   valueRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'baseline',
+    justifyContent: 'center',
+    gap: 3,
   },
   value: {
-    color: colors.cardText,
-    fontSize: 28,
+    ...type.stat,
+    fontSize: 26,
+    lineHeight: 28,
+    color: colors.text,
+  },
+  unit: {
+    fontSize: 11,
+    lineHeight: 14,
   },
 });

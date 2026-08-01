@@ -1,12 +1,4 @@
-import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
 
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme';
@@ -37,37 +29,29 @@ function Bar({
   onPress: () => void;
   maxHeight: number;
 }) {
-  const scale = useSharedValue(1);
-  const grow = useSharedValue(0);
-
-  useEffect(() => {
-    grow.value = withTiming(1, { duration: 520 });
-  }, [grow]);
-
-  useEffect(() => {
-    if (selected) {
-      scale.value = withSequence(
-        withSpring(1.08, { damping: 6, stiffness: 220 }),
-        withSpring(1, { damping: 12 }),
-      );
-    }
-  }, [selected, scale]);
-
-  const barStyle = useAnimatedStyle(() => ({
-    height: Math.max(6, maxHeight * ratio) * grow.value,
-    transform: [{ scaleY: scale.value }],
-    backgroundColor: selected ? colors.white : 'rgba(255,255,255,0.18)',
-  }));
+  const barHeight = Math.max(6, maxHeight * ratio);
+  const roundedValue = Math.round(datum.value);
 
   return (
     <Pressable
       style={styles.col}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      accessibilityLabel={`${datum.label}, ${roundedValue} minute${roundedValue === 1 ? '' : 's'}${selected ? ', selected' : ''}`}
       onPress={() => {
         haptics.selection();
         onPress();
       }}>
       <View style={[styles.barTrack, { height: maxHeight }]}>
-        <Animated.View style={[styles.bar, barStyle]} />
+        <View
+          style={[
+            styles.bar,
+            {
+              height: barHeight,
+              backgroundColor: selected ? colors.black : colors.textGhost,
+            },
+          ]}
+        />
       </View>
       <Txt variant="caption" color={selected ? colors.text : colors.textFaint}>
         {datum.label}
@@ -76,7 +60,7 @@ function Bar({
   );
 }
 
-// Weekday bars; tap a day to select. Selected bar bounces and brightens.
+/** Weekday bars — tap a day to select. Selected bar brightens only (no bounce). */
 export function BarChart({ data, selectedIndex, onSelect, height = 150 }: Props) {
   const max = Math.max(1, ...data.map((d) => d.value));
   return (

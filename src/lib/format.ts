@@ -29,3 +29,15 @@ export function formatHoursUnit(hours: number): string {
 export function pct(value: number): string {
   return `${Math.round(value)} %`;
 }
+
+/**
+ * Daily screen-time stat: under an hour → minutes ("47", "min/day").
+ * An hour or more → exact hours to one decimal ("2.1", "hrs/day").
+ */
+export function formatDailyScreenTime(minutes: number): { value: string; unit: string } {
+  if (minutes < 60) {
+    return { value: `${Math.round(minutes)}`, unit: 'min/day' };
+  }
+  const hours = minutes / 60;
+  return { value: formatHours(hours), unit: hours === 1 ? 'hr/day' : 'hrs/day' };
+}

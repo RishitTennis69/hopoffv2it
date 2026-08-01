@@ -1,6 +1,8 @@
 {
   "name": "hopoff-monitor",
   "version": "1.0.0",
+  "description": "Native monitoring and Screen Time bridge for HopOff.",
+  "license": "UNLICENSED",
   "main": "src/index.ts",
   "peerDependencies": {
     "expo": "*",

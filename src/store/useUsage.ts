@@ -16,6 +16,7 @@ interface UsageState {
   commits: number;
   wastes: number;
   reclaimedMinutes: number;
+  lastCommitAt: number | null;
 
   syncFromDevice: (appIds: string[]) => Promise<void>;
   selectDay: (i: number) => void;
@@ -39,16 +40,33 @@ export const useUsage = create<UsageState>()(
       commits: 0,
       wastes: 0,
       reclaimedMinutes: 0,
+      lastCommitAt: null,
 
       syncFromDevice: async (appIds) => {
-        const week = await getWeekUsage(appIds);
-        set({ week, selectedDayIndex: Math.max(0, week.length - 1) });
+        try {
+          const week = await getWeekUsage(appIds);
+          if (__DEV__) {
+            const totalMin = week.reduce(
+              (sum, d) => sum + Object.values(d.byApp).reduce((a, b) => a + b, 0),
+              0,
+            );
+            console.log(
+              `[HopOff] syncFromDevice: ${week.length} days, ${totalMin} tracked min, apps=${appIds.length || 'default'}`,
+            );
+          }
+          set({ week, selectedDayIndex: Math.max(0, week.length - 1) });
+        } catch (err) {
+          if (__DEV__) {
+            console.warn('[HopOff] syncFromDevice failed:', err);
+          }
+        }
       },
       selectDay: (i) => set({ selectedDayIndex: i }),
       recordCommit: (reclaimedMinutes) =>
         set((s) => ({
           commits: s.commits + 1,
           reclaimedMinutes: s.reclaimedMinutes + reclaimedMinutes,
+          lastCommitAt: Date.now(),
         })),
       recordWaste: () => set((s) => ({ wastes: s.wastes + 1 })),
 
@@ -96,6 +114,7 @@ export const useUsage = create<UsageState>()(
           commits: 0,
           wastes: 0,
           reclaimedMinutes: 0,
+          lastCommitAt: null,
         }),
     }),
     {
@@ -106,6 +125,7 @@ export const useUsage = create<UsageState>()(
         commits: s.commits,
         wastes: s.wastes,
         reclaimedMinutes: s.reclaimedMinutes,
+        lastCommitAt: s.lastCommitAt,
       }),
     },
   ),

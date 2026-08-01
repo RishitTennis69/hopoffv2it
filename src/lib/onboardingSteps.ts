@@ -2,18 +2,18 @@ import { router } from 'expo-router';
 
 export const ONBOARDING_TOTAL = 8;
 
-// Maps a step-dot index (0..7) to a destination. Questions occupy 0,1,2.
+// Maps a step-dot index to the onboarding flow.
 export function jumpToStep(index: number) {
-  if (index <= 2) {
-    router.navigate({ pathname: '/onboarding/questions', params: { q: String(index) } });
-    return;
-  }
+  const clamped = Math.min(Math.max(index, 0), ONBOARDING_TOTAL - 1);
   const map: Record<number, string> = {
-    3: '/onboarding/apps',
-    4: '/onboarding/goals',
+    0: '/onboarding/screen-time',
+    1: '/onboarding/permissions',
+    2: '/onboarding/screen-time-results',
+    3: '/onboarding/goals',
+    4: '/onboarding/redirect',
     5: '/onboarding/videos',
-    6: '/onboarding/permissions',
-    7: '/onboarding/paywall',
+    6: '/onboarding/apps',
+    7: '/onboarding/sessions',
   };
-  router.navigate(map[index] as never);
+  router.navigate(map[clamped] as never);
 }

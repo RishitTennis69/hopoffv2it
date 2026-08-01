@@ -1,23 +1,21 @@
-import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_800ExtraBold,
-  Inter_900Black,
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
   useFonts,
-} from '@expo-google-fonts/inter';
+} from '@expo-google-fonts/plus-jakarta-sans';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 
-import { BootScreen } from '@/components/BootScreen';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ShareIntentBridge } from '@/components/ShareIntentBridge';
 import { startMonitoring } from '@/services/blockMonitor';
@@ -27,34 +25,33 @@ import { colors } from '@/theme';
 SplashScreen.hideAsync().catch(() => {});
 
 export default function RootLayout() {
+  const [fontTimeout, setFontTimeout] = useState(false);
   const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    Inter_800ExtraBold,
-    Inter_900Black,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
   });
-  const [nativeReady, setNativeReady] = useState(false);
-
   useEffect(() => {
     console.log('[HopOff] root layout mounted');
     SplashScreen.hideAsync().catch(() => {});
-
-    const timer = setTimeout(() => setNativeReady(true), 300);
-    return () => clearTimeout(timer);
+    startMonitoring();
   }, []);
 
   useEffect(() => {
-    if (!nativeReady) return;
-    startMonitoring();
-  }, [nativeReady]);
+    const timer = setTimeout(() => {
+      console.warn('[HopOff] font loading timeout');
+      setFontTimeout(true);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const fontsReady = fontsLoaded || !!fontError;
-  if (!nativeReady || !fontsReady) {
+  const fontsReady = fontsLoaded || !!fontError || fontTimeout;
+  if (!fontsReady) {
     return (
       <ErrorBoundary>
-        <BootScreen label="Starting HopOff…" />
+        <View style={{ flex: 1, backgroundColor: colors.bg }} />
       </ErrorBoundary>
     );
   }
@@ -63,8 +60,8 @@ export default function RootLayout() {
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
         <SafeAreaProvider>
-          {nativeReady ? <ShareIntentBridge /> : null}
-          <StatusBar style="light" />
+          <ShareIntentBridge />
+          <StatusBar style="dark" />
           <Stack
             screenOptions={{
               headerShown: false,
@@ -76,7 +73,11 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen
               name="block"
-              options={{ presentation: 'fullScreenModal', animation: 'fade' }}
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'fade',
+                gestureEnabled: false,
+              }}
             />
             <Stack.Screen
               name="settings"

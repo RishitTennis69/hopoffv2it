@@ -1,8 +1,8 @@
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ONBOARDING_TOTAL, jumpToStep } from '@/lib/onboardingSteps';
-import { colors, spacing } from '@/theme';
+import { colors, layout, spacing } from '@/theme';
 import { Icon } from './Icon';
 import { ProgressDots } from './ProgressDots';
 
@@ -28,10 +28,12 @@ export function OnboardingShell({
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top + spacing.sm }]}>
+    <KeyboardAvoidingView
+      style={[styles.root, { paddingTop: insets.top + spacing.sm }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.header}>
-        <Pressable onPress={onBack} hitSlop={12} style={styles.back}>
-          <Icon name="back" size={26} color={colors.text} />
+        <Pressable onPress={onBack} hitSlop={12} style={({ pressed }) => [styles.back, pressed && styles.backPressed]}>
+          <Icon name="back" size={30} color={colors.text} />
         </Pressable>
         <ProgressDots
           total={ONBOARDING_TOTAL}
@@ -41,21 +43,28 @@ export function OnboardingShell({
       </View>
 
       {scroll ? (
-        <ScrollView
-          style={styles.flex}
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled">
-          {children}
-        </ScrollView>
+        <>
+          <ScrollView
+            style={styles.flex}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag">
+            {children}
+          </ScrollView>
+          {footer ? (
+            <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>{footer}</View>
+          ) : null}
+        </>
       ) : (
-        <View style={[styles.flex, styles.content]}>{children}</View>
+        <>
+          <View style={[styles.flex, styles.content]}>{children}</View>
+          {footer ? (
+            <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>{footer}</View>
+          ) : null}
+        </>
       )}
-
-      {footer ? (
-        <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>{footer}</View>
-      ) : null}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -69,21 +78,31 @@ const styles = StyleSheet.create({
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
   },
   back: {
     position: 'absolute',
     left: spacing.screenH,
     zIndex: 2,
+    width: layout.minTapTarget,
+    height: layout.minTapTarget,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backPressed: {
+    backgroundColor: colors.pressFill,
+    transform: [{ scale: 0.96 }],
   },
   content: {
     paddingHorizontal: spacing.screenH,
-    paddingBottom: spacing.xxl,
-    gap: spacing.xl,
+    paddingBottom: spacing.lg,
+    gap: spacing.xxl,
   },
   footer: {
     paddingHorizontal: spacing.screenH,
     paddingTop: spacing.sm,
+    backgroundColor: colors.bg,
     zIndex: 2,
     elevation: 4,
   },

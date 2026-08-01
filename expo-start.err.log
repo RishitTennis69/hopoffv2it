@@ -1,0 +1,25 @@
+[expo-share-intent] IOS module disabled
+Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+"shadow*" style props are deprecated. Use "boxShadow".
+"textShadow*" style props are deprecated. Use "textShadow".
+C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it\node_modules\expo\node_modules\@expo\cli\build\src\utils\errors.js:130
+    throw error;
+    ^
+
+ReferenceError: window is not defined
+    at C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187614:54
+    at C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187584:23
+    at new Promise (<anonymous>)
+    at createPromise (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187582:12)
+    at Object.setItem (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187614:14)
+    at Object.setItem (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187324:44)
+    at setItem (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187380:22)
+    at api.setState (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187388:14)
+    at C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:188241:21
+    at C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187445:52
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:472:9)
+
+Node.js v24.16.0

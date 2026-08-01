@@ -1,139 +1,273 @@
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { AppState, Pressable, StyleSheet, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { AppState, LayoutAnimation, Platform, StyleSheet, UIManager, View } from 'react-native';
+import Animated, {
+  interpolateColor,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { Icon, OnboardingShell, PillButton, ScreenTitle, Txt } from '@/components';
 import {
   PERMISSION_META,
-  REQUIRED_PERMISSIONS,
-  confirmPermission,
   getPermissionStatus,
   openPermissionSettings,
   permissionSteps,
 } from '@/services/nativeUsage';
 import { haptics } from '@/lib/haptics';
+import { trackedAppIds } from '@/lib/trackedApps';
 import { colors, spacing } from '@/theme';
 import { useApps, useUsage } from '@/store';
 import type { PermissionId } from '@/store/types';
 
+const COLOR_MS = 120;
+const BOUNCE_MS = 90;
+const FINISH_MS = COLOR_MS + BOUNCE_MS * 2;
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+function mergePermissionDone(
+  prev: Record<string, boolean>,
+  fromOs: Record<string, boolean>,
+  steps: PermissionId[],
+): Record<string, boolean> {
+  const next = { ...fromOs };
+  for (const step of steps) {
+    if (prev[step]) next[step] = true;
+  }
+  return next;
+}
+
 export default function Permissions() {
-  const steps = permissionSteps();
+  const params = useLocalSearchParams<{ only?: PermissionId; next?: string; step?: string }>();
+  const steps = useMemo(() => {
+    if (params.only === 'usage') return ['usage'] as PermissionId[];
+    if (params.only === 'screenTime') return ['screenTime'] as PermissionId[];
+    if (Platform.OS === 'android') return ['usage', 'accessibility'] as PermissionId[];
+    return permissionSteps();
+  }, [params.only]);
+  const nextRoute = params.next ?? '/onboarding/screen-time';
+  const stepIndex = Number(params.step ?? 0);
   const selectedIds = useApps((s) => s.selectedIds);
+  const groups = useApps((s) => s.groups);
   const syncUsage = useUsage((s) => s.syncFromDevice);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [done, setDone] = useState<Record<string, boolean>>({});
-  const [phase, setPhase] = useState<'open' | 'confirm'>('open');
+  const [celebrating, setCelebrating] = useState(false);
+  const [shieldLit, setShieldLit] = useState(false);
+  const userConfirmed = useRef<Set<PermissionId>>(new Set());
+  const returnedFromSettings = useRef(false);
+  const autoAdvanced = useRef(false);
+  const finishTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // When the user returns from system settings, refresh checkmarks.
+  const shieldScale = useSharedValue(1);
+  const shieldFill = useSharedValue(0);
+
+  const appIds = useMemo(() => trackedAppIds(selectedIds, groups), [selectedIds, groups]);
+
+  const finishOnboarding = useCallback(async () => {
+    try {
+      await syncUsage(appIds);
+    } catch {
+      // Usage may still be stale at the OS level — Progress re-syncs on focus.
+    }
+    router.replace(nextRoute as never);
+  }, [appIds, nextRoute, syncUsage]);
+
+  const playFinishAndAdvance = useCallback(() => {
+    setCelebrating(true);
+    haptics.success();
+    shieldFill.set(withTiming(1, { duration: COLOR_MS }, (colorDone) => {
+      if (!colorDone) return;
+      runOnJS(setShieldLit)(true);
+      shieldScale.set(withSequence(
+        withTiming(1.1, { duration: BOUNCE_MS }),
+        withTiming(1, { duration: BOUNCE_MS }),
+      ));
+    }));
+    finishTimer.current = setTimeout(() => {
+      void finishOnboarding();
+    }, FINISH_MS);
+  }, [finishOnboarding, shieldFill, shieldScale]);
+
+  const completeStep = useCallback(
+    (step: PermissionId, nextDone: Record<string, boolean>) => {
+      userConfirmed.current.add(step);
+      if (step === 'usage' || step === 'screenTime') {
+        syncUsage(appIds).catch(() => {});
+      }
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setDone(nextDone);
+      returnedFromSettings.current = false;
+    },
+    [appIds, syncUsage],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const fromOs: Record<string, boolean> = {};
+      for (const step of steps) {
+        fromOs[step] = await getPermissionStatus(step);
+      }
+      if (cancelled) return;
+      setDone((prev) => mergePermissionDone(prev, fromOs, steps));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [steps]);
+
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
       void (async () => {
+        const fromOs: Record<string, boolean> = {};
         for (const step of steps) {
-          const ok = await getPermissionStatus(step);
-          if (ok) setDone((d) => ({ ...d, [step]: true }));
+          if (userConfirmed.current.has(step)) {
+            fromOs[step] = true;
+            continue;
+          }
+          fromOs[step] = await getPermissionStatus(step);
         }
+        setDone((prev) => {
+          const merged = mergePermissionDone(prev, fromOs, steps);
+          const active = steps.find((s) => !prev[s] && merged[s]);
+          if (active && returnedFromSettings.current) {
+            haptics.success();
+            if (active === 'usage' || active === 'screenTime') {
+              syncUsage(appIds).catch(() => {});
+            }
+            userConfirmed.current.add(active);
+            returnedFromSettings.current = false;
+          }
+          return merged;
+        });
       })();
     });
     return () => sub.remove();
-  }, [steps]);
+  }, [appIds, steps, syncUsage]);
 
-  const current = steps[currentIndex];
-  const meta = PERMISSION_META[current];
-  const requiredDone = REQUIRED_PERMISSIONS.every((p) => done[p]);
-
-  const advance = () => {
-    setPhase('open');
-    if (currentIndex < steps.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      router.push('/onboarding/paywall');
-    }
-  };
-
-  const onOpen = async () => {
-    await openPermissionSettings(current);
-    setPhase('confirm');
-  };
-
-  const onConfirm = async () => {
-    const ok = await confirmPermission(current);
-    if (!ok) return;
-    setDone((d) => ({ ...d, [current]: true }));
-    haptics.success();
-    if (current === 'usage' || current === 'screenTime') {
-      syncUsage(selectedIds).catch(() => {});
-    }
-    advance();
-  };
-
-  const onSkip = () => {
-    setDone((d) => ({ ...d, [current]: true }));
-    advance();
-  };
-
-  const footer = (
-    <PillButton
-      label={phase === 'open' ? meta.openLabel : meta.confirmLabel}
-      onPress={phase === 'open' ? onOpen : onConfirm}
-    />
+  useEffect(
+    () => () => {
+      if (finishTimer.current) clearTimeout(finishTimer.current);
+    },
+    [],
   );
 
-  return (
-    <OnboardingShell stepIndex={6} onBack={() => router.back()} footer={footer} scroll={false}>
-      <View style={styles.body}>
-        <ScreenTitle title="Turn on permissions" center />
+  const activeStep = steps.find((s) => !done[s]) ?? null;
+  const allDone = steps.every((s) => done[s]);
+  const currentStep = activeStep ?? steps[steps.length - 1];
+  const stepMeta = PERMISSION_META[currentStep];
 
-        <View style={[styles.shield, requiredDone && styles.shieldOn]}>
-          <Icon name="shield" size={40} color={requiredDone ? colors.bg : colors.text} />
-          {requiredDone ? (
+  useEffect(() => {
+    if (!allDone || celebrating || autoAdvanced.current) return;
+    autoAdvanced.current = true;
+    const timer = setTimeout(() => {
+      playFinishAndAdvance();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [allDone, celebrating, playFinishAndAdvance]);
+
+  const shieldAnim = useAnimatedStyle(() => ({
+    transform: [{ scale: shieldScale.value }],
+    backgroundColor: interpolateColor(
+      shieldFill.value,
+      [0, 1],
+      [colors.surface, colors.surface],
+    ),
+    borderColor: interpolateColor(
+      shieldFill.value,
+      [0, 1],
+      [colors.glassBorder, colors.glassBorderActive],
+    ),
+  }));
+
+  const shieldIconColor = shieldLit ? colors.black : colors.textMuted;
+
+  const onStepPress = async () => {
+    if (!activeStep || celebrating) return;
+
+    const ok = await getPermissionStatus(activeStep);
+    if (ok) {
+      haptics.success();
+      completeStep(activeStep, { ...done, [activeStep]: true });
+      return;
+    }
+
+    // Not granted yet — send them to Settings. The AppState listener auto-detects
+    // the grant when they return, so there's no manual "I've turned it on" step.
+    returnedFromSettings.current = true;
+    await openPermissionSettings(activeStep);
+  };
+
+  const stepLabel = stepMeta.openLabel;
+
+  const footer = celebrating || allDone ? null : (
+    <View style={styles.footerStack}>
+      <PillButton label={stepLabel} onPress={onStepPress} />
+    </View>
+  );
+
+  const title = 'Connect HopOff.';
+  const subtitle =
+    params.only === 'usage'
+      ? 'Your usage data stays on your phone. HopOff only uses it to show your real screen time and set better limits.'
+      : 'Your usage data stays on your phone. HopOff uses these permissions to track limits and block distracting apps.';
+
+  return (
+    <OnboardingShell stepIndex={stepIndex} onBack={() => router.back()} footer={footer} scroll={false}>
+      <View style={styles.body}>
+        <ScreenTitle title={title} subtitle={subtitle} center />
+
+        <Animated.View style={[styles.shield, shieldAnim]}>
+          <Icon name="shield" size={34} color={shieldIconColor} />
+          {celebrating ? (
             <View style={styles.shieldCheck}>
-              <Icon name="check" size={16} color={colors.bg} />
+              <Icon name="check" size={16} color={colors.white} />
             </View>
           ) : null}
-        </View>
-
-        <Txt variant="body" color={colors.textMuted} center>
-          HopOff uses on-device usage data to show your screen time and to step in when you pass a
-          limit. Your data never leaves your phone.
-        </Txt>
+        </Animated.View>
 
         <View style={styles.checklist}>
-          {steps.map((id: PermissionId, i) => {
-            const isActive = i === currentIndex;
+          {steps.map((id: PermissionId) => {
+            const isFocus = id === activeStep && !allDone && !celebrating;
             const isDone = done[id];
             const m = PERMISSION_META[id];
             return (
-              <View key={id} style={styles.checkItem}>
+              <View
+                key={id}
+                style={[styles.checkItem, isFocus && styles.checkItemFocus, isDone && styles.checkItemDone]}>
                 <View style={styles.row}>
-                  <Txt variant="bodyStrong" color={colors.textMuted}>
-                    {i + 1}.
-                  </Txt>
-                  <View style={[styles.circle, isDone && styles.circleOn]}>
-                    {isDone ? <Icon name="check" size={12} color={colors.bg} /> : null}
+                  <View style={styles.permissionCopy}>
+                    <Txt
+                      variant="bodyStrong"
+                      color={isDone ? colors.textMuted : isFocus ? colors.text : colors.textFaint}>
+                      {m.title}
+                    </Txt>
+                    <Txt variant="caption" color={colors.textMuted}>
+                      {id === 'usage'
+                        ? 'Shows your real usage and powers the limit meter.'
+                        : 'Lets HopOff step in when a blocked app opens.'}
+                    </Txt>
                   </View>
-                  <Txt variant="bodyStrong" color={isActive || isDone ? colors.text : colors.textMuted}>
-                    {m.title}
-                  </Txt>
+                  {isDone ? (
+                    <View style={styles.circleDone}>
+                      <Icon name="check" size={11} color={colors.white} />
+                    </View>
+                  ) : (
+                    <View style={[styles.circle, isFocus && styles.circleFocus]} />
+                  )}
                 </View>
-                {isActive && !isDone ? (
-                  <Txt variant="caption" color={colors.textFaint} style={styles.path}>
-                    {m.path}
-                  </Txt>
-                ) : null}
               </View>
             );
           })}
         </View>
-
-        {meta.skippable && !done[current] ? (
-          <Pressable onPress={onSkip} hitSlop={8}>
-            <Txt variant="body" color={colors.textMuted} center>
-              Skip
-            </Txt>
-          </Pressable>
-        ) : null}
       </View>
     </OnboardingShell>
   );
@@ -144,21 +278,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: spacing.xl,
-    paddingTop: spacing.md,
+    paddingTop: spacing.lg,
   },
   shield: {
-    width: 72,
-    height: 72,
-    borderRadius: 22,
-    backgroundColor: colors.glassFill,
+    width: 104,
+    height: 104,
+    borderRadius: 28,
     borderWidth: StyleSheet.hairlineWidth * 2,
-    borderColor: colors.glassBorder,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  shieldOn: {
-    backgroundColor: colors.white,
-    borderColor: colors.white,
+    shadowColor: colors.black,
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 5,
   },
   shieldCheck: {
     position: 'absolute',
@@ -171,7 +304,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: colors.bg,
+    borderColor: colors.surface,
   },
   checklist: {
     alignSelf: 'stretch',
@@ -180,26 +313,52 @@ const styles = StyleSheet.create({
   },
   checkItem: {
     gap: spacing.xs,
+    opacity: 0.72,
+    minHeight: 82,
+    borderRadius: 22,
+    borderWidth: StyleSheet.hairlineWidth * 2,
+    borderColor: colors.glassBorder,
+    backgroundColor: colors.glassFill,
+    padding: spacing.lg,
+    justifyContent: 'center',
+  },
+  checkItemFocus: {
+    opacity: 1,
+  },
+  checkItemDone: {
+    opacity: 0.75,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
   },
+  permissionCopy: {
+    flex: 1,
+    gap: 4,
+  },
   circle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     borderWidth: 2,
     borderColor: colors.textFaint,
+  },
+  circleFocus: {
+    borderColor: colors.black,
+  },
+  circleDone: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.black,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  circleOn: {
-    backgroundColor: colors.white,
-    borderColor: colors.white,
-  },
   path: {
     marginLeft: 34,
+  },
+  footerStack: {
+    gap: spacing.sm,
   },
 });

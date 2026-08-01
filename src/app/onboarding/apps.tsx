@@ -9,20 +9,20 @@ export default function AppsStep() {
 
   return (
     <OnboardingShell
-      stepIndex={3}
+      stepIndex={6}
       onBack={() => router.back()}
       footer={
         <PillButton
-          label="Continue"
+          label={hasGroupWithLimit ? 'Continue' : 'Choose apps and set a limit'}
           disabled={!hasGroupWithLimit}
-          onPress={() => router.push('/onboarding/goals')}
+          onPress={() => router.push('/onboarding/sessions')}
         />
       }>
       <ScreenTitle
-        title="Select the apps to limit."
-        subtitle="Pick what's on your phone, then group them with a daily limit."
+        title="Pick the apps that pull you off track."
+        subtitle="Select apps, then tap Set Their Limit. HopOff will block that set when the time runs out."
       />
-      <AppsManager />
+      <AppsManager showSessionControls={false} />
     </OnboardingShell>
   );
 }

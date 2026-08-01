@@ -1,7 +1,14 @@
 import { Platform } from 'react-native';
 
 import { APP_CATALOG } from '@/data/apps';
+import { PRODUCTIVE_APPS } from '@/data/productiveApps';
+import { useApps } from '@/store';
 import type { DayUsage, PermissionId, TrackedApp } from '@/store/types';
+
+import {
+  getMicrophonePermissionStatus,
+  openMicrophoneSettings,
+} from './speechRecognition';
 
 import {
   PERMISSION_META,
@@ -22,6 +29,7 @@ const permissionState: Record<PermissionId, boolean> = {
   usage: false,
   accessibility: false,
   screenTime: false,
+  microphone: false,
 };
 
 function delay(ms: number) {
@@ -34,13 +42,22 @@ export async function getInstalledApps(): Promise<TrackedApp[]> {
     'tiktok',
     'instagram',
     'youtube',
-    'youtube_shorts',
-    'reels',
     'snapchat',
     'reddit',
     'x',
   ]);
-  return APP_CATALOG.filter((a) => installed.has(a.id));
+  const productiveAsTracked = PRODUCTIVE_APPS.slice(0, 8).map((app) => ({
+    id: `custom:${app.packageId}`,
+    name: app.name,
+    packageId: app.packageId,
+    brand: 'generic' as const,
+  }));
+  return [...APP_CATALOG.filter((a) => installed.has(a.id)), ...productiveAsTracked, ...useApps.getState().customApps];
+}
+
+export async function getInstalledPackageIds(packageIds: string[]): Promise<string[]> {
+  await delay(100);
+  return packageIds;
 }
 
 export async function getWeekUsage(appIds: string[]): Promise<DayUsage[]> {
@@ -53,15 +70,34 @@ export async function getWeekUsage(appIds: string[]): Promise<DayUsage[]> {
       const base = 18 + ((idx * 37 + i * 13) % 40);
       byApp[id] = Math.round(base * dayWeights[i]);
     });
+
+    return { label, byApp };
+  });
+}
+
+export async function getAllScreenUsage(days = 5): Promise<DayUsage[]> {
+  await delay(300);
+  const pool = ['tiktok', 'instagram', 'youtube', 'messages', 'safari', 'spotify', 'gmail'];
+  return Array.from({ length: Math.min(days, 5) }, (_, i) => {
+    const label = WEEKDAYS[Math.max(0, WEEKDAYS.length - Math.min(days, 5)) + i] ?? WEEKDAYS[i % WEEKDAYS.length];
+    const byApp: Record<string, number> = {};
+    pool.forEach((id, idx) => {
+      byApp[id] = 12 + ((idx * 29 + i * 17) % 55);
+    });
     return { label, byApp };
   });
 }
 
 export async function getPermissionStatus(id: PermissionId): Promise<boolean> {
+  if (id === 'microphone') return getMicrophonePermissionStatus();
   return permissionState[id];
 }
 
-export async function openPermissionSettings(_id: PermissionId): Promise<void> {
+export async function openPermissionSettings(id: PermissionId): Promise<void> {
+  if (id === 'microphone') {
+    await openMicrophoneSettings();
+    return;
+  }
   await delay(150);
 }
 
@@ -69,6 +105,10 @@ export async function confirmPermission(id: PermissionId): Promise<boolean> {
   await delay(150);
   permissionState[id] = true;
   return true;
+}
+
+export async function openScreenTimeAppPicker() {
+  return { applications: 0, categories: 0, webDomains: 0 };
 }
 
 // Silence unused Platform import if tree-shaken oddly.

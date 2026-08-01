@@ -1,0 +1,46 @@
+﻿{
+  "id": "e2fa13bd-0bdf-4732-83b2-56f54698191c",
+  "status": "ERRORED",
+  "platform": "ANDROID",
+  "error": {
+    "errorCode": "UNKNOWN_ERROR",
+    "message": "Unknown error. See logs of the Install dependencies build phase for more information."
+  },
+  "artifacts": {},
+  "fingerprint": {
+    "id": "019eebf5-688f-7700-a527-9938049efda6",
+    "hash": "8b5aa53911b5d1af7052b4e97f46cfd999d66554"
+  },
+  "initiatingActor": {
+    "id": "13396337-ff36-4e56-afdc-8dc192c9138e",
+    "displayName": "kgrogerrr"
+  },
+  "logFiles": [
+    "https://storage.googleapis.com/eas-workflows-production/logs/393531fb-96ee-4fcc-b959-be08f7d1bd68/e2fa13bd-0bdf-4732-83b2-56f54698191c/2026-06-21T21%3A42%3A30Z-c3af42da-cf4c-4360-ae6f-09a160f93320.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260621%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260621T214520Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=454eadd4d542979c3303d9c6f335f056d7e73004baa363162d8c41c66b23fb05f29d460afc1a92170a67ef4016e1bc60c778dd581a8690f7e50ac56339a21689fb1872ab90de798d73bcb5dae482acb7f7774e6fbf00dc1c99c49cbb1c8589b4f959769767b3d0012d56edcbfe389c47d707ef021d127db5efdb2ecfe3a9e3c80638025517e39047da6a35c79b9ea6aff1ef4a5aa366ac9a8090f627660e3fdd6988ffbb0e3f795f6967f0681145457656655df66be5337e96cbd02b34922b5fb9c8fd77a11816e9c165eb2f1c4125239e9eb57020433507ec9280f1d8292fb37e780366279e8e66dc611b2c17ebb203be0c25e92824611828757791d73310a9"
+  ],
+  "project": {
+    "id": "393531fb-96ee-4fcc-b959-be08f7d1bd68",
+    "name": "hopoffv2it",
+    "slug": "hopoffv2it",
+    "ownerAccount": {
+      "id": "f9243141-eabc-48bc-88fc-45b9c56d3be5",
+      "name": "kgrogerrr"
+    }
+  },
+  "distribution": "INTERNAL",
+  "buildProfile": "development",
+  "sdkVersion": "56.0.0",
+  "appVersion": "1.0.0",
+  "appBuildVersion": "1",
+  "priority": "NORMAL",
+  "createdAt": "2026-06-21T21:42:25.635Z",
+  "updatedAt": "2026-06-21T21:42:42.646Z",
+  "completedAt": "2026-06-21T21:42:42.512Z",
+  "expirationDate": "2026-07-05T21:42:25.667Z",
+  "isForIosSimulator": false,
+  "metrics": {
+    "buildWaitTime": 4541,
+    "buildQueueTime": 4346,
+    "buildDuration": 7990
+  }
+}

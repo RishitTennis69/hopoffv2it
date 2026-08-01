@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { useEffect } from 'react';
+import { View } from 'react-native';
 
-import { BootScreen } from '@/components/BootScreen';
+import { colors } from '@/theme';
 import { useOnboarding } from '@/store';
 
 export default function Index() {
@@ -24,5 +25,5 @@ export default function Index() {
     router.replace(completed ? '/(tabs)/progress' : '/onboarding/welcome');
   }, [hydrated, completed]);
 
-  return <BootScreen label={hydrated ? 'Opening…' : 'Loading…'} />;
+  return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 }

@@ -6,4 +6,4 @@
     android:canRetrieveWindowContent="true"
     android:description="@string/hopoff_accessibility_description"
     android:notificationTimeout="100"
-    android:settingsActivity="com.hopoff.app.MainActivity" />
+    android:settingsActivity="com.gethopoff.app.MainActivity" />
