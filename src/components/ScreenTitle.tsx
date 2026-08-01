@@ -11,8 +11,8 @@ interface Props {
 
 export function ScreenTitle({ title, subtitle, center }: Props) {
   return (
-    <View style={{ gap: spacing.sm, alignItems: center ? 'center' : 'flex-start' }}>
-      <Txt variant="title" center={center}>
+    <View style={{ gap: spacing.md, alignItems: center ? 'center' : 'flex-start' }}>
+      <Txt variant="title" center={center} adjustsFontSizeToFit minimumFontScale={0.82}>
         {title}
       </Txt>
       {subtitle ? (

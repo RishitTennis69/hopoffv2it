@@ -3,7 +3,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeInDown, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius, spacing } from '@/theme';
+import { colors, radius, shadow, spacing } from '@/theme';
 
 interface Props {
   visible: boolean;
@@ -57,23 +57,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.scrim,
   },
   sheet: {
-    backgroundColor: colors.darkElevated,
+    backgroundColor: colors.white,
     borderTopLeftRadius: radius.card + 6,
     borderTopRightRadius: radius.card + 6,
     borderWidth: StyleSheet.hairlineWidth * 2,
     borderColor: colors.glassBorder,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
+    ...shadow,
   },
   dialog: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: colors.darkElevated,
+    backgroundColor: colors.white,
     borderRadius: radius.card + 6,
     borderWidth: StyleSheet.hairlineWidth * 2,
     borderColor: colors.glassBorder,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.xl,
+    ...shadow,
   },
   grabber: {
     alignSelf: 'center',

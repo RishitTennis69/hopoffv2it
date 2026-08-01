@@ -1,0 +1,44 @@
+
+> hopoffv2it@1.0.0 web
+> expo start --web --port 8083
+
+env: load .env
+env: export EXPO_PUBLIC_OPENROUTER_API_KEY EXPO_PUBLIC_YOUTUBE_API_KEY
+Starting project at C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it
+Logs: C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it\.expo\dev\logs\start.log
+[expo-share-intent] IOS module disabled
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+
+Waiting on http://localhost:8083
+Logs for your project will appear below.
+λ Bundled 200394ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1 module)
+λ Bundled 191851ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1 module)
+λ Bundled 58334ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1 module)
+Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+[HopOff] YouTube API key loaded: true (len=39)
+[HopOff] OpenRouter API key loaded: true
+[HopOff] OpenRouter model: openai/gpt-4o-mini
+"shadow*" style props are deprecated. Use "boxShadow".
+"textShadow*" style props are deprecated. Use "textShadow".
+C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it\node_modules\expo\node_modules\@expo\cli\build\src\utils\errors.js:130
+    throw error;
+    ^
+
+ReferenceError: window is not defined
+    at C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187872:54
+    at C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187842:23
+    at new Promise (<anonymous>)
+    at createPromise (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187840:12)
+    at Object.setItem (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187872:14)
+    at Object.setItem (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187582:44)
+    at setItem (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187638:22)
+    at api.setState (C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187646:14)
+    at C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:188499:21
+    at C:/Users/K.Grover29/OneDrive - Bellarmine College Preparatory/Documents/hopoffv2it/node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js.bundle?platform=web&dev=true&hot=false&transform.engine=hermes&transform.routerRoot=src%2Fapp&resolver.environment=node&transform.environment=node&unstable_transformProfile=hermes-stable:187703:52
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:472:9)
+
+Node.js v24.16.0

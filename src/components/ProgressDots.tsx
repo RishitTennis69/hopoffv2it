@@ -23,7 +23,7 @@ function Dot({
   const style = useAnimatedStyle(() => ({
     width: withTiming(active ? 22 : 6, { duration: 240 }),
     backgroundColor: withTiming(
-      active ? colors.white : completed ? colors.textMuted : colors.textGhost,
+      active ? colors.black : completed ? colors.textFaint : colors.textGhost,
       { duration: 240 },
     ),
   }));
@@ -35,7 +35,7 @@ function Dot({
   );
 }
 
-// 8-step progress strip; current = elongated white pill, completed dots tappable.
+// Onboarding progress strip; current = elongated black pill, completed dots tappable.
 export function ProgressDots({ total, current, onJump }: Props) {
   return (
     <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>

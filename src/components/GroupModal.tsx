@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
 import { getApp } from '@/data/apps';
 import { colors, spacing } from '@/theme';
@@ -8,7 +8,6 @@ import { AppIcon } from './AppIcon';
 import { HourWheel } from './HourWheel';
 import { PillButton } from './PillButton';
 import { PopupPanel } from './PopupPanel';
-import { Txt } from './Txt';
 
 interface Props {
   visible: boolean;
@@ -16,8 +15,8 @@ interface Props {
   appIds: string[];
   initialName?: string;
   initialLimit?: number;
-  onSave: (name: string, limitHours: number) => void;
-  onDelete?: () => void;
+  initialSessionCount?: number;
+  onSave: (name: string, limitHours: number, sessionCount: number, sessionLimitMinutes: number) => void;
 }
 
 function centerLabels(hours: number) {
@@ -26,65 +25,83 @@ function centerLabels(hours: number) {
   return { big: `${hours}`, small: 'Hrs' };
 }
 
+function GroupModalForm({
+  appIds,
+  initialName,
+  initialLimit,
+  initialSessionCount,
+  onSave,
+}: Omit<Props, 'visible' | 'onClose'>) {
+  const [name, setName] = useState(initialName ?? '');
+  const [limit, setLimit] = useState(initialLimit ?? 0.5);
+
+  const brands = appIds.map((id) => getApp(id)?.brand).filter(Boolean) as BrandKey[];
+  const labels = centerLabels(limit);
+  const dailyMinutes = Math.max(1, Math.round(limit * 60));
+  const sessionOptions = sessionCountOptions(dailyMinutes);
+  const requestedSessionCount = Math.max(1, initialSessionCount ?? sessionOptions[0]);
+  const sessionCount = sessionOptions.includes(requestedSessionCount) ? requestedSessionCount : sessionOptions[0];
+  const sessionLimitMinutes = Math.round(dailyMinutes / sessionCount);
+
+  return (
+    <View style={styles.content}>
+      <TextInput
+        value={name}
+        onChangeText={setName}
+        placeholder="Name of your group"
+        placeholderTextColor={colors.textFaint}
+        style={styles.name}
+      />
+
+      {brands.length > 0 ? (
+        <View style={styles.iconsRow}>
+          {brands.map((brand, i) => (
+            <AppIcon key={`${brand}-${i}`} brand={brand} size={36} />
+          ))}
+        </View>
+      ) : null}
+
+      <HourWheel
+        value={limit}
+        onChange={setLimit}
+        min={0.5}
+        max={3}
+        step={0.5}
+        size={250}
+        centerBig={labels.big}
+        centerSmall={labels.small}
+      />
+
+      <PillButton
+        label="Save Group"
+        onPress={() => onSave(name.trim(), limit, sessionCount, sessionLimitMinutes)}
+        style={{ alignSelf: 'stretch' }}
+      />
+    </View>
+  );
+}
+
 export function GroupModal({
   visible,
   onClose,
   appIds,
   initialName,
   initialLimit,
+  initialSessionCount,
   onSave,
-  onDelete,
 }: Props) {
-  const [name, setName] = useState(initialName ?? '');
-  const [limit, setLimit] = useState(initialLimit ?? 0.5);
-
-  const brands = appIds.map((id) => getApp(id)?.brand).filter(Boolean) as BrandKey[];
-  const labels = centerLabels(limit);
+  const formKey = `${initialName ?? ''}:${initialLimit ?? 0.5}:${initialSessionCount ?? 3}:${appIds.join(',')}`;
 
   return (
     <PopupPanel visible={visible} onClose={onClose} variant="center">
-      <View style={styles.content}>
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          placeholder="Name of your group"
-          placeholderTextColor={colors.textFaint}
-          style={styles.name}
-        />
-
-        {brands.length > 0 ? (
-          <View style={styles.iconsRow}>
-            {brands.map((brand, i) => (
-              <AppIcon key={`${brand}-${i}`} brand={brand} size={36} />
-            ))}
-          </View>
-        ) : null}
-
-        <HourWheel
-          value={limit}
-          onChange={setLimit}
-          min={0.5}
-          max={8}
-          step={0.5}
-          size={250}
-          centerBig={labels.big}
-          centerSmall={labels.small}
-        />
-
-        <PillButton
-          label="Save Group"
-          onPress={() => onSave(name.trim() || 'My group', limit)}
-          style={{ alignSelf: 'stretch' }}
-        />
-
-        {onDelete ? (
-          <Pressable onPress={onDelete} hitSlop={12}>
-            <Txt variant="body" color={colors.danger} center>
-              Delete group
-            </Txt>
-          </Pressable>
-        ) : null}
-      </View>
+      <GroupModalForm
+        key={formKey}
+        appIds={appIds}
+        initialName={initialName}
+        initialLimit={initialLimit}
+        initialSessionCount={initialSessionCount}
+        onSave={onSave}
+      />
     </PopupPanel>
   );
 }
@@ -95,7 +112,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   name: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'PlusJakartaSans_700Bold',
     fontSize: 26,
     color: colors.text,
     textAlign: 'center',
@@ -109,3 +126,11 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
 });
+
+function sessionCountOptions(totalMinutes: number) {
+  const options = [1, 2, 3, 4].filter((count) => {
+    const minutes = totalMinutes / count;
+    return Number.isInteger(minutes) && minutes >= 15 && minutes <= 45 && minutes % 5 === 0;
+  });
+  return options.length ? options : [1];
+}

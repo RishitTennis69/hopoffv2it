@@ -12,15 +12,16 @@ export const spacing = {
 export const radius = {
   sm: 12,
   md: 16,
-  card: 22,
-  pill: 999,
+  card: 24,
+  xl: 32,
+  pill: 18,
 } as const;
 
-// Low-elevation soft black drop shadow used on frosted panels.
+// Soft lift used on white and light-gray panels.
 export const shadow = {
   shadowColor: '#000000',
-  shadowOpacity: 0.5,
+  shadowOpacity: 0.07,
   shadowRadius: 18,
-  shadowOffset: { width: 0, height: 8 },
-  elevation: 6,
+  shadowOffset: { width: 0, height: 10 },
+  elevation: 3,
 } as const;

@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { colors, layout, radius, spacing } from '@/theme';
 import { Icon } from './Icon';
 
 interface Props {
@@ -10,35 +10,50 @@ interface Props {
   onClear?: () => void;
   placeholder?: string;
   loading?: boolean;
+  compact?: boolean;
+  hideAction?: boolean;
 }
 
-export function SearchBar({ value, onChangeText, onSubmit, onClear, placeholder, loading }: Props) {
+export function SearchBar({ value, onChangeText, onSubmit, onClear, placeholder, loading, compact, hideAction }: Props) {
   const hasText = value.length > 0;
   return (
-    <View style={styles.bar}>
+    <View style={[styles.bar, compact && styles.barCompact]}>
       <Icon name="search" size={18} color={colors.textMuted} />
       <TextInput
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={onSubmit}
         returnKeyType="search"
-        placeholder={placeholder ?? 'Search YouTube…'}
+        placeholder={placeholder ?? 'Search YouTube...'}
         placeholderTextColor={colors.textFaint}
         style={styles.input}
       />
-      {loading ? (
+      {hideAction ? null : loading ? (
         <View style={styles.action}>
           <ActivityIndicator size="small" color={colors.textMuted} />
         </View>
-      ) : hasText && onClear ? (
-        <Pressable onPress={onClear} hitSlop={8} style={styles.action}>
-          <Icon name="close" size={18} color={colors.textMuted} />
-        </Pressable>
-      ) : (
-        <Pressable onPress={onSubmit} hitSlop={8} style={styles.action}>
-          <Icon name="arrowRight" size={18} color={colors.text} />
-        </Pressable>
-      )}
+      ) : hasText ? (
+        <View style={styles.actions}>
+          {onClear ? (
+            <Pressable
+              onPress={onClear}
+              hitSlop={8}
+              style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search">
+              <Icon name="close" size={18} color={colors.textMuted} />
+            </Pressable>
+          ) : null}
+          <Pressable
+            onPress={onSubmit}
+            hitSlop={8}
+            style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}
+            accessibilityRole="button"
+            accessibilityLabel="Search now">
+            <Icon name="arrowRight" size={18} color={colors.text} />
+          </Pressable>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -53,16 +68,35 @@ const styles = StyleSheet.create({
     borderColor: colors.glassBorder,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.lg,
-    height: 52,
+    minHeight: layout.minTapTarget + 4,
+  },
+  barCompact: {
+    minHeight: layout.minTapTarget,
+    paddingHorizontal: spacing.md,
   },
   input: {
     flex: 1,
-    fontFamily: 'Inter_500Medium',
+    minWidth: 0,
+    fontFamily: 'PlusJakartaSans_500Medium',
     fontSize: 15,
     color: colors.text,
   },
-  action: {
-    width: 28,
+  actions: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 2,
+    flexShrink: 0,
+  },
+  action: {
+    width: layout.minTapTarget,
+    height: layout.minTapTarget,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  actionPressed: {
+    backgroundColor: colors.pressFill,
+    transform: [{ scale: 0.96 }],
   },
 });

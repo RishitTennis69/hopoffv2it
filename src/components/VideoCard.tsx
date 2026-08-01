@@ -13,7 +13,10 @@ interface Props {
   corner: 'add' | 'trash' | 'added';
   selected?: boolean;
   flash?: boolean;
-  onPress?: () => void;
+  /** Tap thumbnail (outside play badge) to toggle selection in search. */
+  onSelect?: () => void;
+  /** Tap center play badge to preview. */
+  onPlay?: () => void;
   onCorner?: () => void;
 }
 
@@ -23,7 +26,7 @@ function durationLabel(sec: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function VideoCard({ clip, corner, selected, flash, onPress, onCorner }: Props) {
+export function VideoCard({ clip, corner, selected, flash, onSelect, onPlay, onCorner }: Props) {
   const glow = useSharedValue(0);
 
   useEffect(() => {
@@ -33,25 +36,47 @@ export function VideoCard({ clip, corner, selected, flash, onPress, onCorner }: 
   }, [flash, glow]);
 
   const glowStyle = useAnimatedStyle(() => ({
-    borderColor: selected ? colors.white : `rgba(255,255,255,${0.1 + glow.value * 0.5})`,
+    borderColor: selected ? colors.black : `rgba(10,10,10,${0.1 + glow.value * 0.28})`,
   }));
 
   return (
-    <Pressable style={styles.card} onPress={onPress}>
+    <View style={styles.card}>
       <Animated.View style={[styles.thumbWrap, glowStyle, selected && styles.selectedBorder]}>
         <VideoFrame clip={clip} borderRadius={radius.md} />
 
+        {onSelect ? (
+          <Pressable
+            style={styles.selectHit}
+            onPress={onSelect}
+            accessibilityRole="button"
+            accessibilityLabel={selected ? 'Deselect video' : 'Select video'}
+          />
+        ) : null}
+
         {clip.pending ? (
-          <View style={styles.pending}>
+          <View style={styles.pending} pointerEvents="none">
             <ActivityIndicator color={colors.white} />
           </View>
         ) : (
-          <View style={styles.duration}>
+          <View style={styles.duration} pointerEvents="none">
             <Txt variant="caption" color={colors.white}>
               {durationLabel(clip.durationSec)}
             </Txt>
           </View>
         )}
+
+        {onPlay ? (
+          <Pressable
+            onPress={onPlay}
+            hitSlop={8}
+            style={styles.playHit}
+            accessibilityRole="button"
+            accessibilityLabel={`Preview ${clip.title}`}>
+            <View style={styles.playBadge}>
+              <Icon name="play" size={20} color={colors.white} />
+            </View>
+          </Pressable>
+        ) : null}
       </Animated.View>
 
       <View style={styles.meta}>
@@ -66,24 +91,32 @@ export function VideoCard({ clip, corner, selected, flash, onPress, onCorner }: 
 
         <Pressable
           onPress={onCorner}
-          hitSlop={8}
-          style={[styles.cornerBtn, corner === 'added' && styles.cornerAdded]}>
+          hitSlop={10}
+          style={styles.cornerBtn}
+          accessibilityRole="button"
+          accessibilityLabel={
+            corner === 'trash'
+              ? `Remove ${clip.title}`
+              : corner === 'added'
+                ? `Remove ${clip.title} from selection`
+                : `Add ${clip.title}`
+          }>
           {corner === 'trash' ? (
             <Icon name="trash" size={16} color={colors.textMuted} />
           ) : corner === 'added' ? (
-            <Icon name="check" size={16} color={colors.text} />
+            <Icon name="minus" size={16} color={colors.textMuted} />
           ) : (
             <Icon name="plus" size={18} color={colors.text} />
           )}
         </Pressable>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
+    width: '100%',
     gap: spacing.sm,
   },
   thumbWrap: {
@@ -91,9 +124,36 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1.5,
     overflow: 'hidden',
+    backgroundColor: colors.dark,
   },
   selectedBorder: {
     borderWidth: 2,
+  },
+  selectHit: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 1,
+  },
+  playHit: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -24,
+    marginLeft: -24,
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  playBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.35)',
   },
   duration: {
     position: 'absolute',
@@ -103,21 +163,20 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
+    zIndex: 3,
   },
   pending: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.4)',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 3,
   },
   meta: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
+    minHeight: 62,
   },
   cornerBtn: {
     width: 30,
@@ -128,9 +187,5 @@ const styles = StyleSheet.create({
     borderColor: colors.glassBorder,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  cornerAdded: {
-    backgroundColor: colors.glassFillActive,
-    borderColor: colors.glassBorderActive,
   },
 });

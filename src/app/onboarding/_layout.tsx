@@ -14,9 +14,12 @@ export default function OnboardingLayout() {
       <Stack.Screen name="welcome" options={{ animation: 'fade' }} />
       <Stack.Screen name="questions" />
       <Stack.Screen name="apps" />
+      <Stack.Screen name="sessions" />
       <Stack.Screen name="goals" />
+      <Stack.Screen name="redirect" />
       <Stack.Screen name="videos" />
       <Stack.Screen name="permissions" />
+      <Stack.Screen name="calculating-score" options={{ animation: 'fade' }} />
       <Stack.Screen name="paywall" />
     </Stack>
   );

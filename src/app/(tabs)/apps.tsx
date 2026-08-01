@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppsManager, Txt } from '@/components';
+import { AppsManager, ScreenTitle } from '@/components';
 import { colors, spacing } from '@/theme';
 
 export default function AppsTab() {
@@ -9,13 +9,11 @@ export default function AppsTab() {
   return (
     <ScrollView
       style={styles.root}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.lg }]}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.xl }]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled">
-      <Txt variant="title" center>
-        Apps
-      </Txt>
-      <AppsManager />
+      <ScreenTitle title="Block out the noise" subtitle="Search your apps, then group what HopOff should limit." />
+      <AppsManager groupsFirst />
     </ScrollView>
   );
 }
@@ -25,6 +23,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.screenH,
     paddingBottom: spacing.xxxl,
-    gap: spacing.xl,
+    gap: spacing.xxl,
   },
 });

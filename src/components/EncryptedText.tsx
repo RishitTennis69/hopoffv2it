@@ -14,6 +14,7 @@ interface Props {
   duration?: number;
   style?: TextStyle;
   color?: string;
+  center?: boolean;
   onDone?: () => void;
 }
 
@@ -22,7 +23,7 @@ function randSymbol() {
 }
 
 // Random symbols scramble, then resolve left-to-right into the real text.
-export function EncryptedText({ text, delay = 0, duration = 500, style, color, onDone }: Props) {
+export function EncryptedText({ text, delay = 0, duration = 500, style, color, center, onDone }: Props) {
   const [display, setDisplay] = useState('');
   const frame = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -59,7 +60,7 @@ export function EncryptedText({ text, delay = 0, duration = 500, style, color, o
   }, [text, delay, duration]);
 
   return (
-    <Txt style={[type.title, { color: color ?? colors.text }, style]}>
+    <Txt center={center} style={[type.title, { color: color ?? colors.text }, style]}>
       {display || ''}
     </Txt>
   );

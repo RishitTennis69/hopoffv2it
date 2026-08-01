@@ -1,73 +1,77 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 
-import {
-  ConfirmModal,
-  HourWheel,
-  Icon,
-  OnboardingShell,
-  PillButton,
-  RankingList,
-  ScreenTitle,
-  SelectRow,
-  Txt,
-} from '@/components';
+import { HourWheel, Icon, OnboardingShell, PillButton, ScreenTitle, SelectRow } from '@/components';
 import type { IconName } from '@/components';
+import { jumpToStep } from '@/lib/onboardingSteps';
 import { colors, spacing } from '@/theme';
-import { DEFAULT_PRIORITIES, TRIGGER_OPTIONS, useOnboarding } from '@/store';
+import { TRIGGER_OPTIONS, useOnboarding } from '@/store';
 
-const PRIORITY_ICONS: Record<string, IconName> = {
-  'Be more present': 'present',
-  'Hit my goals': 'goals',
-  'Sleep better': 'sleep',
-  'Build better habits': 'habits',
-};
+/** Two onboarding questions (priorities step was removed). */
+const QUESTION_COUNT = 2;
+
+function parseQuestionStep(q: string | string[] | undefined): number {
+  const raw = Array.isArray(q) ? q[0] : q;
+  const n = Number(raw ?? 0);
+  if (Number.isNaN(n)) return 0;
+  return Math.min(Math.max(n, 0), QUESTION_COUNT - 1);
+}
 
 export default function Questions() {
   const params = useLocalSearchParams<{ q?: string }>();
-  const [step, setStep] = useState(Number(params.q ?? 0));
+  const step = parseQuestionStep(params.q);
 
   const triggers = useOnboarding((s) => s.triggers);
   const toggleTrigger = useOnboarding((s) => s.toggleTrigger);
   const dailyHours = useOnboarding((s) => s.dailyHours);
   const setDailyHours = useOnboarding((s) => s.setDailyHours);
-  const priorities = useOnboarding((s) => s.priorities);
-  const prioritiesTouched = useOnboarding((s) => s.prioritiesTouched);
-  const setPriorities = useOnboarding((s) => s.setPriorities);
 
-  const [showDefaults, setShowDefaults] = useState(false);
+  const goToStep = (index: number) => {
+    const clamped = Math.min(Math.max(index, 0), QUESTION_COUNT - 1);
+    router.setParams({ q: String(clamped) });
+  };
 
   const back = () => {
-    if (step > 0) setStep(step - 1);
+    if (step > 0) goToStep(step - 1);
     else router.back();
   };
 
-  const goNext = () => setStep(step + 1);
-
-  const finishQuestions = () => router.push('/onboarding/apps');
-
-  const onContinueRanking = () => {
-    if (!prioritiesTouched) setShowDefaults(true);
-    else finishQuestions();
+  const goNext = () => {
+    if (step === 0 && triggers.length === 0) return;
+    if (step < QUESTION_COUNT - 1) {
+      goToStep(step + 1);
+      return;
+    }
+    router.push('/onboarding/apps');
   };
 
-  // --- footers per sub-step ---
-  const footer =
-    step === 0 ? (
-      <PillButton label="Next" onPress={goNext} disabled={triggers.length === 0} />
-    ) : step === 1 ? (
-      <PillButton label="Next" onPress={goNext} />
-    ) : (
-      <PillButton label="Continue" onPress={onContinueRanking} />
-    );
+  const isLastQuestion = step >= QUESTION_COUNT - 1;
+  const canAdvanceTriggers = triggers.length > 0;
+
+  const footer = isLastQuestion ? (
+    <PillButton label="Continue" onPress={goNext} />
+  ) : (
+    <PillButton
+      key={canAdvanceTriggers ? 'triggers-ready' : 'triggers-empty'}
+      label={canAdvanceTriggers ? 'Next' : 'Choose one to continue'}
+      onPress={goNext}
+      disabled={!canAdvanceTriggers}
+    />
+  );
 
   return (
-    <OnboardingShell stepIndex={step} onBack={back} onJump={(i) => (i <= 2 ? setStep(i) : undefined)} footer={footer}>
+    <OnboardingShell
+      stepIndex={step}
+      onBack={back}
+      onJump={(i) => {
+        if (i <= 1) goToStep(i);
+        else jumpToStep(i);
+      }}
+      footer={footer}>
       {step === 0 ? (
         <Animated.View key="q0" entering={FadeInRight} exiting={FadeOutLeft} style={styles.group}>
-          <ScreenTitle title="When do you reach for your phone most?" />
+          <ScreenTitle title="When do apps pull you off track?" />
           <View style={{ gap: spacing.md }}>
             {TRIGGER_OPTIONS.map((opt) => (
               <SelectRow
@@ -88,7 +92,7 @@ export default function Questions() {
 
       {step === 1 ? (
         <Animated.View key="q1" entering={FadeInRight} exiting={FadeOutLeft} style={styles.group}>
-          <ScreenTitle title="How much time do you lose to your phone each day?" />
+          <ScreenTitle title="How much time do you want back each day?" />
           <View style={styles.wheelWrap}>
             <HourWheel
               value={dailyHours}
@@ -102,34 +106,6 @@ export default function Questions() {
           </View>
         </Animated.View>
       ) : null}
-
-      {step === 2 ? (
-        <Animated.View key="q2" entering={FadeInRight} exiting={FadeOutLeft} style={styles.group}>
-          <ScreenTitle title="What should HopOff prioritize for you?" />
-          <Txt variant="body" color={colors.textMuted} center>
-            Press and hold a row, then drag to reorder — #1 is your top priority
-          </Txt>
-          <RankingList
-            items={priorities}
-            onChange={(next) => setPriorities(next, true)}
-            iconFor={(label) => PRIORITY_ICONS[label] ?? 'goals'}
-          />
-        </Animated.View>
-      ) : null}
-
-      <ConfirmModal
-        visible={showDefaults}
-        title="Keep the default order?"
-        message="You haven't reordered your priorities — we'll use the default order. You can change this anytime."
-        confirmLabel="Use defaults"
-        cancelLabel="Go back"
-        onConfirm={() => {
-          setPriorities(DEFAULT_PRIORITIES, false);
-          setShowDefaults(false);
-          finishQuestions();
-        }}
-        onCancel={() => setShowDefaults(false)}
-      />
     </OnboardingShell>
   );
 }

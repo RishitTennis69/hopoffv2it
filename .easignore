@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+
+# Expo / generated native output
+.expo/
+dist/
+dist-demo/
+dist-check/
+web-build/
+.expo-tmp-bundle-test/
+expo-env.d.ts
+/ios/
+/android/
+
+# local automation / generated artifacts
+.agents/
+.codex-previews/
+.codex-remote-attachments/
+docs/
+*.log
+*.out.log
+*.err.log
+build*.json
+build-status*.json
+latest-android-builds.json
+resolved-expo-config.json
+metro-web*.log
+time-picker-preview*.png
+
+# local secrets / credentials
+.env
+.env*.local
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# OS/editor
+desktop.ini
+.DS_Store
+*.tsbuildinfo

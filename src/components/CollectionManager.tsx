@@ -1,32 +1,41 @@
-import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInUp, FadeOut } from 'react-native-reanimated';
 
 import { haptics } from '@/lib/haptics';
-import { searchYouTube } from '@/services/youtube';
-import { resolveSharedClip, simulateShare } from '@/services/shareIntake';
+import { searchYouTube, YouTubeSearchError } from '@/services/youtube';
 import { colors, spacing } from '@/theme';
 import { useVideos } from '@/store';
 import type { VideoClip } from '@/store/types';
-import { PillButton } from './PillButton';
 import { SearchBar } from './SearchBar';
-import { ShareNote } from './ShareNote';
 import { Txt } from './Txt';
 import { VideoCard } from './VideoCard';
 import { VideoPlayerModal } from './VideoPlayerModal';
 
+export interface SelectionFooter {
+  count: number;
+  onAdd: () => void;
+  onClear: () => void;
+}
+
 interface Props {
   searchLabel?: string;
   showShareNote?: boolean;
-  /** Notifies the parent so onboarding can hide its footer during select mode. */
   onSelectModeChange?: (active: boolean) => void;
+  onSelectionFooterChange?: (footer: SelectionFooter | null) => void;
 }
 
-export function CollectionManager({ searchLabel, showShareNote = true, onSelectModeChange }: Props) {
+export function CollectionManager({
+  searchLabel,
+  showShareNote = false,
+  onSelectModeChange,
+  onSelectionFooterChange,
+}: Props) {
   const library = useVideos((s) => s.library);
   const lastAddedId = useVideos((s) => s.lastAddedId);
   const addVideo = useVideos((s) => s.addVideo);
   const removeVideo = useVideos((s) => s.removeVideo);
+  const hasVideo = useVideos((s) => s.hasVideo);
 
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,10 +59,16 @@ export function CollectionManager({ searchLabel, showShareNote = true, onSelectM
   const runSearch = async (q: string) => {
     if (!q.trim()) return;
     setLoading(true);
-    const res = await searchYouTube(q);
-    setResults(res);
-    setSelected([]);
-    setLoading(false);
+    try {
+      const res = await searchYouTube(q);
+      setResults(res);
+      setSelected([]);
+    } catch (err) {
+      setResults([]);
+      showToast(err instanceof YouTubeSearchError ? err.message : 'Search failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onChangeText = (t: string) => {
@@ -79,30 +94,47 @@ export function CollectionManager({ searchLabel, showShareNote = true, onSelectM
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   };
 
-  const addSelected = () => {
-    if (!results) return;
-    results.filter((r) => selected.includes(r.id)).forEach(addVideo);
-    haptics.success();
-    showToast(`Added ${selected.length} to library`);
-    clearSearch();
-  };
+  const clearSelection = useCallback(() => {
+    setSelected([]);
+  }, []);
 
-  const handleShare = async (platform: 'tiktok' | 'instagram') => {
-    const pending = simulateShare(platform);
-    addVideo(pending);
-    showToast('Added to library');
-    const resolved = await resolveSharedClip(pending);
-    removeVideo(resolved.url ?? resolved.id);
-    addVideo(resolved);
-  };
+  const addSelected = useCallback(() => {
+    if (!results) return;
+    const picked = results.filter((r) => selected.includes(r.id));
+    let added = 0;
+    let skipped = 0;
+    picked.forEach((clip) => {
+      if (hasVideo(clip)) skipped += 1;
+      else {
+        addVideo(clip);
+        added += 1;
+      }
+    });
+    haptics.success();
+    if (added === 0 && skipped > 0) {
+      showToast('Already in your library');
+    } else if (skipped > 0) {
+      showToast(`Added ${added} / ${skipped} already in library`);
+    } else {
+      showToast(`Added ${added} to library`);
+    }
+    clearSearch();
+  }, [addVideo, hasVideo, results, selected]);
+
+  useEffect(() => {
+    if (!onSelectionFooterChange) return;
+    if (inSearch && selected.length > 0) {
+      onSelectionFooterChange({ count: selected.length, onAdd: addSelected, onClear: clearSelection });
+    } else {
+      onSelectionFooterChange(null);
+    }
+  }, [inSearch, selected.length, onSelectionFooterChange, addSelected, clearSelection]);
 
   const grid = inSearch ? results! : library;
 
   return (
     <View style={{ gap: spacing.lg }}>
-      {searchLabel ? (
-        <Txt variant="subheading">{searchLabel}</Txt>
-      ) : null}
+      {searchLabel ? <Txt variant="subheading">{searchLabel}</Txt> : null}
 
       <SearchBar
         value={query}
@@ -110,39 +142,41 @@ export function CollectionManager({ searchLabel, showShareNote = true, onSelectM
         onSubmit={() => runSearch(query)}
         onClear={clearSearch}
         loading={loading}
-        placeholder='Try "David Goggins"'
+        placeholder='Try "gym edit"'
       />
-
-      <View style={styles.grid}>
-        {grid.map((clip) => {
-          return (
-            <View key={clip.id} style={styles.cell}>
-              <VideoCard
-                clip={clip}
-                corner={inSearch ? (selected.includes(clip.id) ? 'added' : 'add') : 'trash'}
-                selected={inSearch && selected.includes(clip.id)}
-                flash={!inSearch && clip.id === lastAddedId}
-                onPress={() => (inSearch ? toggleSelect(clip.id) : setPlaying(clip))}
-                onCorner={() =>
-                  inSearch ? toggleSelect(clip.id) : removeVideo(clip.id)
-                }
-              />
-            </View>
-          );
-        })}
-      </View>
-
       {inSearch && selected.length > 0 ? (
-        <Animated.View entering={FadeInUp} exiting={FadeOut}>
-          <PillButton label={`Add ${selected.length} video${selected.length > 1 ? 's' : ''}`} onPress={addSelected} />
-        </Animated.View>
+        <Pressable onPress={clearSelection} hitSlop={8} style={styles.clearRow}>
+          <Txt variant="caption" color={colors.textMuted}>
+            Clear selection ({selected.length})
+          </Txt>
+        </Pressable>
       ) : null}
 
-      {!inSearch && showShareNote ? <ShareNote onShare={handleShare} /> : null}
+      <View style={styles.grid}>
+        {grid.map((clip) => (
+          <View key={clip.id} style={styles.cell}>
+            <VideoCard
+              clip={clip}
+              corner={inSearch ? (selected.includes(clip.id) ? 'added' : 'add') : 'trash'}
+              selected={inSearch && selected.includes(clip.id)}
+              flash={!inSearch && clip.id === lastAddedId}
+              onSelect={inSearch ? () => toggleSelect(clip.id) : undefined}
+              onPlay={() => setPlaying(clip)}
+              onCorner={() => (inSearch ? toggleSelect(clip.id) : removeVideo(clip.id))}
+            />
+          </View>
+        ))}
+      </View>
+
+      {!inSearch && showShareNote ? (
+        <Txt variant="caption" color={colors.textMuted}>
+          TikTok and Instagram importing is paused while we make it reliable.
+        </Txt>
+      ) : null}
 
       {toast ? (
         <Animated.View entering={FadeInUp} exiting={FadeOut} style={styles.toast}>
-          <Txt variant="bodyStrong" color={colors.bg}>
+          <Txt variant="bodyStrong" color={colors.text}>
             {toast}
           </Txt>
         </Animated.View>
@@ -154,6 +188,9 @@ export function CollectionManager({ searchLabel, showShareNote = true, onSelectM
 }
 
 const styles = StyleSheet.create({
+  clearRow: {
+    alignSelf: 'flex-start',
+  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -161,6 +198,7 @@ const styles = StyleSheet.create({
   },
   cell: {
     width: '47.5%',
+    minWidth: 0,
   },
   toast: {
     position: 'absolute',

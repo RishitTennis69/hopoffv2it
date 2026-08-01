@@ -1,30 +1,41 @@
-import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 
-import { colors, radius } from '@/theme';
+import { colors, radius, shadow } from '@/theme';
 import type { VideoClip } from '@/store/types';
 import { VideoFrame } from './VideoFrame';
 
 interface Props {
   clip: VideoClip;
-  /** Fires once the user has watched enough to unlock the commit CTA. */
-  onWatchedEnough?: () => void;
+  playing?: boolean;
+  /** Fires when the clip finishes playing (not a timer estimate). */
+  onVideoFinished?: () => void;
 }
 
-// Light shell on the black block screen, holding the 9:16 motivation clip.
-export function BlockVideoFrame({ clip, onWatchedEnough }: Props) {
+export function BlockVideoFrame({ clip, playing = true, onVideoFinished }: Props) {
+  const finished = useRef(false);
+
   useEffect(() => {
-    // No reliable progress event for the webview embed — gate on a watch
-    // threshold scaled to clip length (min 5s, max 10s).
-    const threshold = Math.min(10000, Math.max(5000, clip.durationSec * 1000 * 0.4));
-    const t = setTimeout(() => onWatchedEnough?.(), threshold);
-    return () => clearTimeout(t);
-  }, [clip.durationSec, onWatchedEnough]);
+    finished.current = false;
+  }, [clip.id]);
+
+  const finishOnce = useCallback(() => {
+    if (finished.current) return;
+    finished.current = true;
+    onVideoFinished?.();
+  }, [onVideoFinished]);
 
   return (
     <View style={styles.shell}>
       <View style={styles.inner}>
-        <VideoFrame clip={clip} playing muted={false} borderRadius={radius.md} />
+        <VideoFrame
+          clip={clip}
+          playing={playing}
+          muted={Platform.OS === 'web'}
+          noControls
+          borderRadius={radius.md - 1}
+          onEnded={finishOnce}
+        />
       </View>
     </View>
   );
@@ -32,21 +43,23 @@ export function BlockVideoFrame({ clip, onWatchedEnough }: Props) {
 
 const styles = StyleSheet.create({
   shell: {
-    backgroundColor: colors.card,
-    borderRadius: radius.card,
-    padding: 10,
     alignSelf: 'center',
-    width: '74%',
-    shadowColor: '#000',
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 10,
+    width: '96%',
+    maxWidth: 380,
+    aspectRatio: 9 / 16,
+    borderRadius: radius.xl,
+    borderWidth: StyleSheet.hairlineWidth * 2,
+    borderColor: colors.glassBorder,
+    padding: 4,
+    backgroundColor: colors.white,
+    ...shadow,
   },
   inner: {
-    aspectRatio: 9 / 16,
-    borderRadius: radius.md,
-    overflow: 'hidden',
+    // No overflow:'hidden' here — VideoFrame already clips the player. A second
+    // hardware-layer clip around the WebView video surface can leave it black
+    // (audio only) on some Android devices.
+    flex: 1,
+    borderRadius: radius.card,
     backgroundColor: '#000',
   },
 });

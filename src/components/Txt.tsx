@@ -10,7 +10,7 @@ interface Props extends TextProps {
   center?: boolean;
 }
 
-// Inter text with a typography variant + sensible default color.
+// App text with a typography variant + sensible default color.
 export function Txt({ variant = 'body', color, center, style, ...rest }: Props) {
   const base = type[variant] as TextStyle;
   return (

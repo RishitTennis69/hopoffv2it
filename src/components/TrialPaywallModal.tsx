@@ -30,10 +30,11 @@ export function TrialPaywallModal({ visible, onClose, dismissible = true }: Prop
     <PopupPanel visible={visible} onClose={dismissible ? onClose : () => {}}>
       <View style={{ gap: spacing.lg }}>
         <Txt variant="title" center>
-          Keep your momentum
+          Your free week is up
         </Txt>
         <Txt variant="body" color={colors.textMuted} center>
-          Your free week is over. Pick a plan to keep blocking, tracking, and committing.
+          You&apos;ve been using HopOff for seven days — looks like it&apos;s working. Pick a plan
+          to keep blocking, tracking, and committing.
         </Txt>
 
         <View style={{ gap: spacing.md }}>
@@ -44,7 +45,7 @@ export function TrialPaywallModal({ visible, onClose, dismissible = true }: Prop
                 <GlassCard active={active} highlight style={styles.plan}>
                   <View style={styles.planLeft}>
                     <View style={[styles.radio, active && styles.radioOn]}>
-                      {active ? <Icon name="check" size={12} color={colors.bg} /> : null}
+                      {active ? <Icon name="check" size={12} color={colors.white} /> : null}
                     </View>
                     <View>
                       <Txt variant="bodyStrong">{p.title}</Txt>
@@ -55,7 +56,7 @@ export function TrialPaywallModal({ visible, onClose, dismissible = true }: Prop
                   </View>
                   {p.note ? (
                     <View style={styles.badge}>
-                      <Txt variant="caption" color={colors.bg}>
+                      <Txt variant="caption" color={colors.white}>
                         {p.note}
                       </Txt>
                     </View>
@@ -116,11 +117,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioOn: {
-    backgroundColor: colors.white,
-    borderColor: colors.white,
+    backgroundColor: colors.black,
+    borderColor: colors.black,
   },
   badge: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.black,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: 4,

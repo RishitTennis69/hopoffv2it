@@ -1,0 +1,6 @@
+[expo-share-intent] IOS module disabled
+Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+"shadow*" style props are deprecated. Use "boxShadow".
+"textShadow*" style props are deprecated. Use "textShadow".

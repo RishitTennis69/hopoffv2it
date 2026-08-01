@@ -1,158 +1,183 @@
-import { Feather, FontAwesome6, Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  InputAccessoryView,
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
-import { haptics } from '@/lib/haptics';
 import { colors, spacing } from '@/theme';
 import { useGoals } from '@/store';
-import type { GoalConnections } from '@/store/types';
 import { GlassCard } from './GlassCard';
 import { Txt } from './Txt';
 
-interface ConnectDef {
-  key: keyof GoalConnections;
-  label: string;
-  badge: React.ReactNode;
-}
-
-const CONNECTIONS: ConnectDef[] = [
-  {
-    key: 'notion',
-    label: 'Notion',
-    badge: <Txt style={{ fontFamily: 'Inter_900Black', fontSize: 16, color: colors.white }}>N</Txt>,
-  },
-  { key: 'reminders', label: 'Reminders', badge: <Ionicons name="list" size={16} color={colors.white} /> },
-  { key: 'notes', label: 'Notes', badge: <Feather name="file-text" size={15} color={colors.white} /> },
-  {
-    key: 'googleTasks',
-    label: 'Google Tasks',
-    badge: <FontAwesome6 name="google" iconStyle="brand" size={14} color={colors.white} />,
-  },
-];
-
-const MOCK_TRANSCRIPTS = [
-  'Read 10 pages',
-  'Go to the gym',
-  'Call my parents',
-  'Sleep before midnight',
-];
+const INPUT_ACCESSORY_ID = 'goals-editor-done';
 
 interface Props {
   minHeight?: number;
   placeholder?: string;
+  onBlurPolish?: () => void;
+  polishing?: boolean;
 }
 
-export function GoalsEditor({ minHeight = 160, placeholder }: Props) {
+export function GoalsEditor({
+  minHeight = 160,
+  placeholder,
+  onBlurPolish,
+  polishing,
+}: Props) {
   const text = useGoals((s) => s.text);
   const setText = useGoals((s) => s.setText);
-  const connections = useGoals((s) => s.connections);
-  const toggleConnection = useGoals((s) => s.toggleConnection);
-  const [recording, setRecording] = useState(false);
+  const [overlayHeight, setOverlayHeight] = useState(0);
 
-  const onMic = () => {
-    if (recording) return;
-    haptics.medium();
-    setRecording(true);
-    setTimeout(() => {
-      const line = MOCK_TRANSCRIPTS[Math.floor(Math.random() * MOCK_TRANSCRIPTS.length)];
-      const next = text.trim().length ? `${text.trim()}\n${line}` : line;
-      setText(next);
-      setRecording(false);
-      haptics.success();
-    }, 1500);
+  const veil = useSharedValue(0);
+  const shimmerY = useSharedValue(0);
+  const polishingActive = useSharedValue(0);
+
+  useEffect(() => {
+    if (polishing) {
+      polishingActive.value = 1;
+      veil.value = withRepeat(
+        withSequence(withTiming(0.62, { duration: 500 }), withTiming(0.48, { duration: 500 })),
+        -1,
+        true,
+      );
+      if (overlayHeight > 0) {
+        const travel = Math.max(overlayHeight - 2, 0);
+        shimmerY.value = withRepeat(
+          withSequence(
+            withTiming(0, { duration: 0 }),
+            withTiming(travel, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+          ),
+          -1,
+          false,
+        );
+      }
+      return;
+    }
+
+    veil.value = withTiming(0, { duration: 480 });
+    shimmerY.value = withTiming(0, { duration: 480 });
+    polishingActive.value = 0;
+  }, [polishing, overlayHeight, polishingActive, shimmerY, veil]);
+
+  const veilStyle = useAnimatedStyle(() => ({
+    opacity: polishingActive.value ? veil.value : 0,
+  }));
+
+  const shimmerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: shimmerY.value }],
+    opacity: polishingActive.value ? 0.9 : 0,
+  }));
+
+  const dismissAndPolish = () => {
+    Keyboard.dismiss();
+    onBlurPolish?.();
   };
 
   return (
-    <View style={{ gap: spacing.lg }}>
+    <Pressable style={{ gap: spacing.lg }} onPress={Keyboard.dismiss} accessible={false}>
       <GlassCard style={styles.editor}>
         <TextInput
           value={text}
           onChangeText={setText}
+          onBlur={() => onBlurPolish?.()}
+          returnKeyType="default"
+          blurOnSubmit={false}
           multiline
           placeholder={placeholder ?? 'Write your goals, one per line…'}
           placeholderTextColor={colors.textFaint}
           style={[styles.input, { minHeight }]}
           textAlignVertical="top"
+          editable={!polishing}
+          inputAccessoryViewID={Platform.OS === 'ios' ? INPUT_ACCESSORY_ID : undefined}
         />
-        <Pressable onPress={onMic} style={[styles.mic, recording && styles.micOn]} hitSlop={8}>
-          <Feather name="mic" size={18} color={recording ? colors.bg : colors.text} />
-        </Pressable>
+
+        {polishing ? (
+          <View
+            style={styles.overlay}
+            pointerEvents="auto"
+            onLayout={(e) => setOverlayHeight(e.nativeEvent.layout.height)}>
+            <Animated.View style={[StyleSheet.absoluteFill, styles.veil, veilStyle]} />
+            <Animated.View style={[styles.shimmerBar, shimmerStyle]} />
+            <View style={styles.overlayLabel}>
+              <Txt variant="bodyStrong" color={colors.white} center>
+                Polishing…
+              </Txt>
+            </View>
+          </View>
+        ) : null}
       </GlassCard>
 
-      <View style={{ gap: spacing.sm }}>
-        <Txt variant="caption" color={colors.textMuted}>
-          CONNECT
-        </Txt>
-        {CONNECTIONS.map((c) => {
-          const connected = connections[c.key];
-          return (
-            <Pressable key={c.key} onPress={() => { haptics.selection(); toggleConnection(c.key); }}>
-              <GlassCard active={connected} style={styles.connectRow}>
-                <View style={styles.connectLeft}>
-                  <View style={styles.badge}>{c.badge}</View>
-                  <Txt variant="bodyStrong">{c.label}</Txt>
-                </View>
-                <Txt variant="body" color={connected ? colors.text : colors.textMuted}>
-                  {connected ? 'Connected' : 'Connect'}
-                </Txt>
-              </GlassCard>
+      {Platform.OS === 'ios' ? (
+        <InputAccessoryView nativeID={INPUT_ACCESSORY_ID}>
+          <View style={styles.accessory}>
+            <Pressable onPress={dismissAndPolish} hitSlop={8}>
+              <Txt variant="bodyStrong" color={colors.accent}>
+                Done
+              </Txt>
             </Pressable>
-          );
-        })}
-      </View>
-    </View>
+          </View>
+        </InputAccessoryView>
+      ) : null}
+
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   editor: {
     padding: spacing.lg,
+    overflow: 'hidden',
+    position: 'relative',
   },
   input: {
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     fontSize: 16,
     lineHeight: 24,
     color: colors.text,
-    paddingRight: 44,
   },
-  mic: {
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  veil: {
+    backgroundColor: '#000',
+  },
+  shimmerBar: {
     position: 'absolute',
-    right: spacing.md,
-    bottom: spacing.md,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.glassFillActive,
-    borderWidth: StyleSheet.hairlineWidth * 2,
-    borderColor: colors.glassBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  micOn: {
+    left: spacing.lg,
+    right: spacing.lg,
+    top: 0,
+    height: 2,
+    borderRadius: 1,
     backgroundColor: colors.white,
-    borderColor: colors.white,
   },
-  connectRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  overlayLabel: {
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    minHeight: 56,
+    zIndex: 2,
   },
-  connectLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  badge: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: colors.dark,
-    borderWidth: StyleSheet.hairlineWidth * 2,
-    borderColor: colors.glassBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
+  accessory: {
+    backgroundColor: colors.darkElevated,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.glassBorder,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    alignItems: 'flex-end',
   },
 });

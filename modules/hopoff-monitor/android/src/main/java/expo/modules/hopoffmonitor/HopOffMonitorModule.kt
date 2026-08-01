@@ -102,6 +102,29 @@ class HopOffMonitorModule : Module() {
       }
     }
 
+    AsyncFunction("getLaunchableApps") {
+      val ctx = appContext.reactContext ?: return@AsyncFunction emptyList<Map<String, String>>()
+      val pm = ctx.packageManager
+      val intent =
+        Intent(Intent.ACTION_MAIN).apply {
+          addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+      @Suppress("DEPRECATION")
+      val activities = pm.queryIntentActivities(intent, 0)
+      activities
+        .mapNotNull { info ->
+          val activityInfo = info.activityInfo ?: return@mapNotNull null
+          val pkg = activityInfo.packageName ?: return@mapNotNull null
+          if (pkg == ctx.packageName) return@mapNotNull null
+          mapOf(
+            "name" to info.loadLabel(pm).toString(),
+            "packageId" to pkg,
+          )
+        }
+        .distinctBy { it["packageId"] }
+        .sortedBy { it["name"]?.lowercase(Locale.US) ?: "" }
+    }
+
     AsyncFunction("hasUsageAccess") {
       hasUsageAccess(appContext.reactContext)
     }
@@ -116,6 +139,13 @@ class HopOffMonitorModule : Module() {
       true
     }
 
+    /** Pause blocking for an app for N minutes ("I'm gonna waste my life"). */
+    AsyncFunction("snoozeApp") { appId: String, minutes: Int ->
+      val prefs = appContext.reactContext?.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+      val until = System.currentTimeMillis() + minutes.toLong() * 60_000L
+      prefs?.edit()?.putLong("$KEY_SNOOZE_PREFIX$appId", until)?.apply()
+    }
+
     /** Per-package foreground minutes for the last N calendar days (UsageStatsManager). */
     AsyncFunction("getPackageUsageHistory") { packageNames: List<String>, days: Int ->
       val ctx = appContext.reactContext ?: return@AsyncFunction emptyList<Map<String, Any>>()
@@ -128,6 +158,7 @@ class HopOffMonitorModule : Module() {
       val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
       val safeDays = days.coerceIn(1, 30)
       val packageSet = packageNames.toSet()
+      val includeAllPackages = packageSet.isEmpty()
       val dayTotals = linkedMapOf<String, MutableMap<String, Long>>()
 
       for (offset in (safeDays - 1) downTo 0) {
@@ -151,43 +182,53 @@ class HopOffMonitorModule : Module() {
         val dateStr = fmt.format(java.util.Date(start))
         val dayMap = dayTotals.getOrPut(dateStr) { mutableMapOf() }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-          val aggregated = usm.queryAndAggregateUsageStats(start, end)
-          for (pkg in packageNames) {
-            val ms = aggregated[pkg]?.totalTimeInForeground ?: 0L
-            if (ms > 0L) dayMap[pkg] = (dayMap[pkg] ?: 0L) + ms
-          }
-        } else {
-          @Suppress("DEPRECATION")
-          val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, start, end) ?: emptyList()
-          for (pkg in packageNames) {
-            val ms = stats.filter { it.packageName == pkg }.sumOf { it.totalTimeInForeground }
-            if (ms > 0L) dayMap[pkg] = (dayMap[pkg] ?: 0L) + ms
-          }
-        }
+        aggregateUsageFromEvents(usm, start, end, packageSet, includeAllPackages, fmt, dayTotals)
       }
 
       val totalMs = dayTotals.values.sumOf { day -> day.values.sum() }
       if (totalMs == 0L && dayTotals.isNotEmpty()) {
-        val rangeStartCal = Calendar.getInstance()
-        rangeStartCal.add(Calendar.DAY_OF_YEAR, -(safeDays - 1))
-        rangeStartCal.set(Calendar.HOUR_OF_DAY, 0)
-        rangeStartCal.set(Calendar.MINUTE, 0)
-        rangeStartCal.set(Calendar.SECOND, 0)
-        rangeStartCal.set(Calendar.MILLISECOND, 0)
-        aggregateUsageFromEvents(
-          usm,
-          rangeStartCal.timeInMillis,
-          System.currentTimeMillis(),
-          packageSet,
-          fmt,
-          dayTotals,
-        )
+        for (offset in (safeDays - 1) downTo 0) {
+          val startCal = Calendar.getInstance()
+          startCal.add(Calendar.DAY_OF_YEAR, -offset)
+          startCal.set(Calendar.HOUR_OF_DAY, 0)
+          startCal.set(Calendar.MINUTE, 0)
+          startCal.set(Calendar.SECOND, 0)
+          startCal.set(Calendar.MILLISECOND, 0)
+          val start = startCal.timeInMillis
+          val endCal = startCal.clone() as Calendar
+          endCal.add(Calendar.DAY_OF_YEAR, 1)
+          val end = if (offset == 0) min(endCal.timeInMillis, System.currentTimeMillis()) else endCal.timeInMillis
+          val dateStr = fmt.format(java.util.Date(start))
+          val dayMap = dayTotals.getOrPut(dateStr) { mutableMapOf() }
+
+          if (includeAllPackages) {
+            @Suppress("DEPRECATION")
+            val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, start, end) ?: emptyList()
+            for (stat in stats) {
+              val ms = stat.totalTimeInForeground
+              if (ms > 0L) dayMap[stat.packageName] = (dayMap[stat.packageName] ?: 0L) + ms
+            }
+          } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val aggregated = usm.queryAndAggregateUsageStats(start, end)
+            for (pkg in packageNames) {
+              val ms = aggregated[pkg]?.totalTimeInForeground ?: 0L
+              if (ms > 0L) dayMap[pkg] = (dayMap[pkg] ?: 0L) + ms
+            }
+          } else {
+            @Suppress("DEPRECATION")
+            val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, start, end) ?: emptyList()
+            for (pkg in packageNames) {
+              val ms = stats.filter { it.packageName == pkg }.sumOf { it.totalTimeInForeground }
+              if (ms > 0L) dayMap[pkg] = (dayMap[pkg] ?: 0L) + ms
+            }
+          }
+        }
       }
 
       val result = mutableListOf<Map<String, Any>>()
       for ((dateStr, pkgs) in dayTotals) {
-        for (pkg in packageNames) {
+        val outputPackages = if (includeAllPackages) pkgs.keys else packageNames
+        for (pkg in outputPackages) {
           val ms = pkgs[pkg] ?: 0L
           result.add(
             mapOf(
@@ -241,6 +282,7 @@ class HopOffMonitorModule : Module() {
   companion object {
     const val PREFS = "hopoff_monitor"
     const val KEY_GROUPS = "groups_json"
+    const val KEY_SNOOZE_PREFIX = "snooze_until_"
 
     fun hasUsageAccess(context: Context?): Boolean {
       if (context == null) return false
@@ -284,6 +326,7 @@ class HopOffMonitorModule : Module() {
       start: Long,
       end: Long,
       packages: Set<String>,
+      includeAllPackages: Boolean,
       fmt: SimpleDateFormat,
       dayTotals: MutableMap<String, MutableMap<String, Long>>,
     ) {
@@ -294,7 +337,7 @@ class HopOffMonitorModule : Module() {
       while (events.hasNextEvent()) {
         events.getNextEvent(event)
         val pkg = event.packageName
-        if (pkg !in packages) continue
+        if (!includeAllPackages && pkg !in packages) continue
 
         when (event.eventType) {
           UsageEvents.Event.ACTIVITY_RESUMED,

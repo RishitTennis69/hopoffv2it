@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { haptics } from '@/lib/haptics';
 import { colors, spacing } from '@/theme';
+import { AnimatedChoice } from './AnimatedChoice';
 import { GlassCard } from './GlassCard';
 import { Icon } from './Icon';
 import { Txt } from './Txt';
@@ -20,20 +21,24 @@ interface Props {
 
 export function SelectRow({ label, selected, onPress, left, subtitle, checkStyle = 'check' }: Props) {
   return (
-    <Pressable
+    <AnimatedChoice
+      selected={selected}
       onPress={() => {
         haptics.selection();
         onPress();
-      }}>
+      }}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: selected }}
+      containerStyle={styles.fill}>
       <GlassCard active={selected} highlight style={styles.row}>
         <View style={styles.left}>
           {left}
           <View style={styles.labelWrap}>
-            <Txt variant="bodyStrong" color={selected ? colors.text : colors.text}>
+            <Txt variant="bodyStrong" color={selected ? colors.text : colors.text} numberOfLines={1}>
               {label}
             </Txt>
             {subtitle ? (
-              <Txt variant="caption" color={colors.textMuted}>
+              <Txt variant="caption" color={colors.textMuted} numberOfLines={1}>
                 {subtitle}
               </Txt>
             ) : null}
@@ -42,17 +47,22 @@ export function SelectRow({ label, selected, onPress, left, subtitle, checkStyle
 
         {checkStyle === 'circle' ? (
           <View style={[styles.circle, selected && styles.circleOn]}>
-            {selected && <Icon name="check" size={14} color={colors.cardText} />}
+            {selected && (
+              <Icon name="check" size={14} color={colors.white} />
+            )}
           </View>
         ) : selected ? (
           <Icon name="check" size={20} color={colors.text} />
         ) : null}
       </GlassCard>
-    </Pressable>
+    </AnimatedChoice>
   );
 }
 
 const styles = StyleSheet.create({
+  fill: {
+    width: '100%',
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -60,15 +70,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
     minHeight: 64,
+    width: '100%',
+    gap: spacing.md,
   },
   left: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     flex: 1,
+    minWidth: 0,
   },
   labelWrap: {
     flex: 1,
+    minWidth: 0,
     gap: 2,
   },
   circle: {
@@ -81,7 +95,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   circleOn: {
-    backgroundColor: colors.white,
-    borderColor: colors.white,
+    backgroundColor: colors.black,
+    borderColor: colors.black,
   },
 });

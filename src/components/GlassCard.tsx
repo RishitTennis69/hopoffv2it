@@ -1,6 +1,6 @@
 import { type ViewProps, View, StyleSheet } from 'react-native';
 
-import { colors, radius } from '@/theme';
+import { colors, radius, shadow } from '@/theme';
 
 interface Props extends ViewProps {
   active?: boolean;
@@ -9,7 +9,7 @@ interface Props extends ViewProps {
   rounded?: number;
 }
 
-// Dark glass surface — ~4% white fill, hairline border that brightens when active.
+// Light gray card surface with a hairline border that brightens when active.
 export function GlassCard({
   active,
   highlight,
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
   base: {
     borderWidth: StyleSheet.hairlineWidth * 2,
     overflow: 'hidden',
+    ...shadow,
   },
   highlight: {
     position: 'absolute',

@@ -1,0 +1,186 @@
+env: load .env
+env: export EXPO_PUBLIC_OPENROUTER_API_KEY EXPO_PUBLIC_YOUTUBE_API_KEY
+Starting project at C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it
+Logs: C:\Users\K.Grover29\OneDrive - Bellarmine College Preparatory\Documents\hopoffv2it\.expo\dev\logs\start.log
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+
+Waiting on http://localhost:8099
+An update for expo is available: 56.0.12 → ~56.0.15
+6 other packages may need updating. Run npx expo install --check for details.
+Logs for your project will appear below.
+λ Bundled 21062ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1628 modules)
+[HopOff] YouTube API key loaded: true (len=39)
+[HopOff] OpenRouter API key loaded: true
+[HopOff] OpenRouter model: openai/gpt-4o-mini
+Web Bundled 24016ms node_modules\expo-router\entry.js (1588 modules)
+Web Bundled 4806ms node_modules\expo-router\entry.js (1586 modules)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+Web  WARN  Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+Web  LOG  [HopOff] YouTube API key loaded: true (len=39)
+Web  LOG  [HopOff] OpenRouter API key loaded: true
+Web  LOG  [HopOff] OpenRouter model: openai/gpt-4o-mini
+Web  WARN  "shadow*" style props are deprecated. Use "boxShadow".
+Web  WARN  "textShadow*" style props are deprecated. Use "textShadow".
+Web  LOG  [HopOff] root layout mounted
+Web  LOG  [HopOff] index mounted
+Web  WARN  props.pointerEvents is deprecated. Use style.pointerEvents
+Web  WARN  [HopOff] font loading timeout
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  LOG  [HopOff] syncFromDevice: 5 days, 467 tracked min, apps=default
+Web  LOG  [HopOff] syncFromDevice: 5 days, 467 tracked min, apps=default
+Web Bundled 20934ms node_modules\expo-router\entry.js (1 module)
+λ Bundled 21760ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1 module)
+[HopOff] YouTube API key loaded: true (len=39)
+[HopOff] OpenRouter API key loaded: true
+[HopOff] OpenRouter model: openai/gpt-4o-mini
+Web Bundled 7247ms node_modules\expo-router\entry.js (1 module)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+Web  WARN  Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+Web  LOG  [HopOff] YouTube API key loaded: true (len=39)
+Web  LOG  [HopOff] OpenRouter API key loaded: true
+Web  LOG  [HopOff] OpenRouter model: openai/gpt-4o-mini
+Web  WARN  "shadow*" style props are deprecated. Use "boxShadow".
+Web  WARN  "textShadow*" style props are deprecated. Use "textShadow".
+Web  LOG  [HopOff] root layout mounted
+Web  LOG  [HopOff] index mounted
+Web  WARN  props.pointerEvents is deprecated. Use style.pointerEvents
+Web  WARN  [HopOff] font loading timeout
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web Bundled 3749ms node_modules\expo-router\entry.js (1 module)
+λ Bundled 3831ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1 module)
+[HopOff] YouTube API key loaded: true (len=39)
+[HopOff] OpenRouter API key loaded: true
+[HopOff] OpenRouter model: openai/gpt-4o-mini
+Web Bundled 2721ms node_modules\expo-router\entry.js (1 module)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+Web  WARN  Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+Web  LOG  [HopOff] YouTube API key loaded: true (len=39)
+Web  LOG  [HopOff] OpenRouter API key loaded: true
+Web  LOG  [HopOff] OpenRouter model: openai/gpt-4o-mini
+Web  WARN  "shadow*" style props are deprecated. Use "boxShadow".
+Web  WARN  "textShadow*" style props are deprecated. Use "textShadow".
+Web  LOG  [HopOff] root layout mounted
+Web  WARN  props.pointerEvents is deprecated. Use style.pointerEvents
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  WARN  [HopOff] font loading timeout
+Web Bundled 8161ms node_modules\expo-router\entry.js (1 module)
+λ Bundled 8378ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1 module)
+[HopOff] YouTube API key loaded: true (len=39)
+[HopOff] OpenRouter API key loaded: true
+[HopOff] OpenRouter model: openai/gpt-4o-mini
+Web Bundled 3287ms node_modules\expo-router\entry.js (1 module)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+Web  WARN  Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+Web  LOG  [HopOff] YouTube API key loaded: true (len=39)
+Web  LOG  [HopOff] OpenRouter API key loaded: true
+Web  LOG  [HopOff] OpenRouter model: openai/gpt-4o-mini
+Web  WARN  "shadow*" style props are deprecated. Use "boxShadow".
+Web  WARN  "textShadow*" style props are deprecated. Use "textShadow".
+Web  LOG  [HopOff] root layout mounted
+Web  LOG  [HopOff] index mounted
+Web  WARN  props.pointerEvents is deprecated. Use style.pointerEvents
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  WARN  [HopOff] font loading timeout
+Web  LOG  [HopOff] syncFromDevice: 5 days, 467 tracked min, apps=default
+Web  LOG  [HopOff] syncFromDevice: 5 days, 467 tracked min, apps=default
+λ Bundled 9871ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1 module)
+[HopOff] YouTube API key loaded: true (len=39)
+[HopOff] OpenRouter API key loaded: true
+[HopOff] OpenRouter model: openai/gpt-4o-mini
+Web Bundled 12724ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 191ms node_modules\expo-router\entry.js (1 module)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+Web  WARN  Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+Web  LOG  [HopOff] YouTube API key loaded: true (len=39)
+Web  LOG  [HopOff] OpenRouter API key loaded: true
+Web  LOG  [HopOff] OpenRouter model: openai/gpt-4o-mini
+Web  WARN  "shadow*" style props are deprecated. Use "boxShadow".
+Web  WARN  "textShadow*" style props are deprecated. Use "textShadow".
+Web  LOG  [HopOff] root layout mounted
+Web  LOG  [HopOff] root layout mounted
+Web  WARN  [HopOff] font loading timeout
+λ Bundled 20022ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1 module)
+[HopOff] API proxy configured: false
+Web Bundled 23794ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 6320ms node_modules\expo-router\entry.js (1 module)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+Web  WARN  Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+Web  LOG  [HopOff] API proxy configured: false
+Web  WARN  "shadow*" style props are deprecated. Use "boxShadow".
+Web  WARN  "textShadow*" style props are deprecated. Use "textShadow".
+Web  LOG  [HopOff] root layout mounted
+Web  LOG  [HopOff] index mounted
+Web  WARN  props.pointerEvents is deprecated. Use style.pointerEvents
+Web  WARN  [HopOff] font loading timeout
+λ Bundled 6537ms node_modules\expo\node_modules\@expo\cli\node_modules\@expo\router-server\node\render.js (1 module)
+[HopOff] API proxy configured: false
+Web Bundled 8260ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 344ms node_modules\expo-router\entry.js (1 module)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+Web  WARN  Require cycle: src/store/index.ts -> src/store/useUsage.ts -> src/services/nativeUsage.ts -> src/store/index.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.
+Web  LOG  [HopOff] API proxy configured: false
+Web  WARN  "shadow*" style props are deprecated. Use "boxShadow".
+Web  WARN  "textShadow*" style props are deprecated. Use "textShadow".
+Web  LOG  [HopOff] root layout mounted
+Web  WARN  props.pointerEvents is deprecated. Use style.pointerEvents
+Web  WARN  [HopOff] font loading timeout
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+Web  LOG  [HopOff] syncFromDevice: 5 days, 316 tracked min, apps=2
+› Detected a change in metro.config.js. Restart the server to see the new results.
+› Detected a change in babel.config.js. Restart the server to see the new results. You may need to clear the bundler cache with the --clear flag for your changes to take effect.
